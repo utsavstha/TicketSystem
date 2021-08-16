@@ -1,0 +1,102 @@
+{% extends 'main.html' %}
+{% block content %}
+{% include 'nav.html' %}
+
+<div id="page-content-wrapper">
+    <div id="content">
+        <div class="container-fluid p-0 px-lg-0 px-md-0">
+            <!-- Topbar -->
+            {% include 'topbar.html' %}
+            <div class="col-md-12 mt-4">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- title -->
+                        <div class="d-md-flex align-items-center">
+                            <div>
+                                <h4 class="card-title">Priorities</h4>
+                                <h5 class="card-subtitle">List of all available Priorities</h5>
+                            </div>
+                            <div class="ml-auto">
+                                <div class="dl">
+                                    <a href="{% url 'create_priority' %}"
+                                        class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                                        Add New<i class="fas fa-plus-circle mx-2"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- title -->
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table v-middle">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th class="border-top-0">ID</th>
+                                    <th class="border-top-0">Name</th>
+                                    <th class="border-top-0">Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for class in priority %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="">
+                                                <h4 class="m-b-0 font-16">{{class.id}}</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="">
+                                                <h4 class="m-b-0 font-16">{{class.name}}</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <a href="{% url 'update_priority' class.id %}"
+                                            class="d-none d-sm-inline-block btn btn-sm btn-warning shadow-sm ">
+                                            <i class="fas fa-edit ml-1 mr-0"></i></a>
+                                        <a href="#" data-toggle="modal" data-target="#priorityDeleteModal{{class.id}}"
+                                            class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm ">
+                                            <i class="fas fa-trash-alt"></i></a>
+                                    </td>
+                                    <div class="modal fade" id="priorityDeleteModal{{class.id}}" tabindex="-1"
+                                        role="dialog" aria-labelledby="priorityDeleteModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="priorityDeleteModalLabel">Would you like
+                                                        to delete {{class.name}}?</h5>
+                                                    <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-sm btn-secondary"
+                                                        data-dismiss="modal">Close</button>
+                                                    <a class="btn btn-sm btn-danger"
+                                                        href="{% url 'delete_priority' class.id %}">Delete</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

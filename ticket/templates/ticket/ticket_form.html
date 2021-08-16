@@ -1,0 +1,114 @@
+{% extends 'main.html' %}
+{% block content %}
+{% include 'nav.html' %}
+{% load bootstrap %}
+{% load static %}
+
+<div id="page-content-wrapper">
+    <div id="content">
+        <div class="container-fluid p-0 px-lg-0 px-md-0">
+            <!-- Topbar -->
+            {% include 'child_top_bar.html' %}
+            <div class="col-md-12 mt-4">
+                {{ boards_serialized|json_script:"boards" }}
+                {{ groups_serialized|json_script:"groups" }}
+                {{ accounts_serialized|json_script:"accounts" }}
+
+                <!-- {{form}} -->
+                <div class="col-md-12 mt-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- title -->
+                            <div class="d-md-flex align-items-center">
+                                <div>
+                                    <h4 class="card-title">Tickets</h4>
+                                    <h5 class="card-subtitle">Create new Ticket</h5>
+                                </div>
+
+                            </div>
+                            <!-- title -->
+                            <form action="" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="exampleFormControlInput1">Title</label>
+                                    <input type="text" class="form-control" id="ticket_name" name="ticket_name"
+                                        placeholder="Ticket Name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="priority">Priority</label>
+                                    <select class="form-control" id="priority" name="priority">
+                                        {% for priority in priorities %}
+                                        <option id="{{priority.id}}">{{priority.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="classification">Classification</label>
+                                    <select class="form-control" id="classification" name="classification">
+                                        {% for classification in classifications %}
+                                        <option id="{{classification.id}}">{{classification.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="group">Group</label>
+                                    <select multiple data-multi-select-plugin id="group" name="group">
+                                        {% for group in groups %}
+                                        <option id="{{group.id}}" value="{{group.name}}">{{group.name}}</option>
+                                        {% endfor %}
+
+                                    </select>
+
+                                </div>
+                                <div class="form-group">
+                                    <label for="boards">Boards</label>
+                                    <select multiple data-multi-select-plugin id="boards" name="boards">
+                                        <!-- {% for board in boards %}
+                                        <option id="{{board.id}}" value="{{board.title}}">{{board.title}}</option>
+                                        {% endfor %} -->
+                                    </select>
+
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="assigned-users">Assigned users</label>
+                                    <select multiple data-multi-select-plugin id="assigned-users" name="assigned-users">
+                                        {% for account in accounts %}
+                                        <option id="{{account.id}}" value="{{account.email}}">{{account.email}}</option>
+                                        {% endfor %}
+                                    </select>
+
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="staff_complete"
+                                        name="staff_complete">
+                                    <label class="form-check-label" for="staff_complete">
+                                        Staffs can move the ticket to completed
+                                    </label>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="description">Description</label>
+                                    <textarea class="form-control" id="description" name="description"
+                                        rows="3"></textarea>
+                                </div>
+                            </form>
+                            {{ file_form | bootstrap }}
+                            <input class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm " type="submit"
+                                value="SAVE">
+                            </form>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+<script src="{% static '/js/multi-selector.js'%}"></script>
+
+{% endblock %}

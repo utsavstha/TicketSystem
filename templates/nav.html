@@ -1,0 +1,74 @@
+<nav class="fixed-top align-top" id="sidebar-wrapper" role="navigation">
+    <div class="simplebar-content" style="padding: 0px;">
+        <a class="sidebar-brand" href="#">
+            <span class="align-middle">Ticketing System</span>
+        </a>
+
+        <ul class="navbar-nav align-self-stretch">
+            <li class="sidebar-header">
+                Pages
+            </li>
+            <li class="">
+                <a href="{% url 'boards'%}" class="nav-link text-left {{activate_board}}" role="button"
+                    aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-home"></i> Boards
+                </a>
+            </li>
+            {% if request.user.is_superuser %}
+            <li class="">
+                <a href="{% url 'create_board' %}" class="nav-link text-left {{activate_create_board}}" role="button"
+                    aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-home"></i> Add New Board
+                </a>
+            </li>
+            <li class="">
+                <a href="{% url 'tickets'%}" class="nav-link text-left {{activate_tickets}}" role="button"
+                    aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-home"></i> Tickets
+                </a>
+            </li>
+
+
+            <li class="">
+                <a href="{% url 'users'%}" class="nav-link text-left {{activate_users}}" role="button"
+                    aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-home"></i> Users
+                </a>
+            </li>
+
+            <li class="">
+                <a href="{% url 'groups'%}" class="nav-link text-left {{activate_groups}}" role="button"
+                    aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-home"></i> Groups
+                </a>
+            </li>
+
+            <li class="">
+                <a href="{% url 'classification'%}" class="nav-link text-left {{activate_classification}}" role="button"
+                    aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-home"></i> Classification
+                </a>
+            </li>
+
+            <li class="">
+                <a href="{% url 'priorities'%}" class="nav-link text-left {{activate_priorities}}" role="button"
+                    aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-home"></i> Priorities
+                </a>
+            </li>
+
+            <li class="">
+                <a href="{% url 'email_settings'%}" class="nav-link text-left {{activate_email_settings}}" role="button"
+                    aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-home"></i> Email Settings
+                </a>
+            </li>
+            {% endif %}
+
+        </ul>
+
+
+    </div>
+
+
+</nav>

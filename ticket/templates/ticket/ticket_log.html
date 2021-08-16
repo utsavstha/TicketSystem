@@ -1,0 +1,106 @@
+{% extends 'main.html' %}
+{% block content %}
+{% include 'nav.html' %}
+
+<div id="page-content-wrapper">
+    <div id="content">
+        <div class="container-fluid p-0 px-lg-0 px-md-0">
+            <!-- Topbar -->
+            {% include 'child_top_bar.html' %}
+            <div class="col-md-12 mt-4">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- title -->
+                        <div class="d-md-flex align-items-center">
+                            <div>
+                                <h4 class="card-title">TicketLogs</h4>
+                                <h5 class="card-subtitle">Logs</h5>
+                            </div>
+
+                        </div>
+                        <!-- title -->
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table v-middle">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th class="border-top-0">ID</th>
+                                    <th class="border-top-0">Ticket Name</th>
+                                    <th class="border-top-0">Title</th>
+                                    <th class="border-top-0">Description</th>
+                                    <th class="border-top-0">Timestamp</th>
+                                    <th class="border-top-0">Updated By</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in logs %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="">
+                                                <h4 class="m-b-0 font-16">{{log.id}}</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="">
+                                                <h4 class="m-b-0 font-16">{{log.ticket_name}}</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="">
+                                                <h4 class="m-b-0 font-16">{{log.title}}</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="">
+                                                <h4 class="m-b-0 font-16">{{log.description}}</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="">
+                                                <h4 class="m-b-0 font-16">{{log.timestamp}}</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="">
+                                                <h4 class="m-b-0 font-16">{{log.updated_by}}</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                </tr>
+
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+{% endblock %}

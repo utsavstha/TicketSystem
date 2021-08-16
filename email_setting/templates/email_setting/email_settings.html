@@ -1,0 +1,130 @@
+{% extends 'main.html' %}
+{% block content %}
+{% include 'nav.html' %}
+
+<div id="page-content-wrapper">
+    <div id="content">
+        <div class="container-fluid p-0 px-lg-0 px-md-0">
+            <!-- Topbar -->
+            {% include 'topbar.html' %}
+            <div class="col-md-12 mt-4">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- title -->
+                        <div class="d-md-flex align-items-center">
+                            <div>
+                                <h4 class="card-title">Email Settings</h4>
+                                <h5 class="card-subtitle">List of all Email Settings</h5>
+                            </div>
+                            <div class="ml-auto">
+                                <div class="dl">
+                                    <a href="{% url 'create_email_settings' %}"
+                                        class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                                        Add New<i class="fas fa-plus-circle mx-2"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- title -->
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table v-middle">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th class="border-top-0">Model Name</th>
+                                    <th class="border-top-0">Create</th>
+                                    <th class="border-top-0">Update</th>
+                                    <th class="border-top-0">Delete</th>
+                                    <th class="border-top-0">Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for email_setting in email_settings %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="">
+                                                <h4 class="m-b-0 font-16">{{email_setting.model_name}}</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if email_setting.create %}
+                                            <a href="#"
+                                                class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ">
+                                                True</i></a>
+                                            {% else %}
+                                            <a href="#"
+                                                class="d-none d-sm-inline-block btn btn-sm btn-warning shadow-sm ">
+                                                False</i></a>
+                                            {% endif %}
+
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            {% if email_setting.update %}
+                                            <a href="#"
+                                                class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ">
+                                                True</i></a>
+                                            {% else %}
+                                            <a href="#"
+                                                class="d-none d-sm-inline-block btn btn-sm btn-warning shadow-sm ">
+                                                False</i></a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            {% if email_setting.delete %}
+                                            <a href="#"
+                                                class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ">
+                                                True</i></a>
+                                            {% else %}
+                                            <a href="#"
+                                                class="d-none d-sm-inline-block btn btn-sm btn-warning shadow-sm ">
+                                                False</i></a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+
+
+                                    <td>
+                                        <a href="{% url 'update_email_settings' email_setting.id %}"
+                                            class="d-none d-sm-inline-block btn btn-sm btn-warning shadow-sm ">
+                                            <i class="fas fa-edit ml-1 mr-0"></i></a>
+
+                                    </td>
+
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row text-muted">
+                    <div class="col-6 text-left">
+                        <p class="mb-0">
+                            <a href="index.html" class="text-muted"><strong>Inventory Management
+                                </strong></a> &copy
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </footer>
+
+    </div>
+</div>
+
+{% endblock %}

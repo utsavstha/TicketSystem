@@ -1,0 +1,398 @@
+{% extends 'main.html' %}
+{% block content %}
+{% include 'nav.html' %}
+{% load bootstrap %}
+
+<div id="page-content-wrapper">
+    <div id="content">
+        <div class="container-fluid p-0 px-lg-0 px-md-0">
+            <!-- Topbar -->
+            {% include 'topbar.html' %}
+            <div class="col-md-12">
+
+                <div class="board-layout">
+
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- title -->
+                            <div class="d-md-flex align-items-center">
+                                <div>
+                                    <h4 class="card-title">Boards</h4>
+                                    <h5 class="card-subtitle">List of all available Boards</h5>
+                                </div>
+
+                                <div class="ml-auto">
+                                    <div class="d-flex justify-content-end">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-success dropdown-toggle"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Boards
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                {% for board in boards %}
+                                                <a class="dropdown-item"
+                                                    href="{% url 'get_board' board.id %}">{{board.title}}
+                                                    <span hidden>{{board.id}}</span></a>
+                                                {% endfor %}
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+
+
+                            <div class="d-md-flex align-items-center mt-100">
+                                <div class="left">
+                                    <div class="board-text">{{board.title}}</div>
+                                </div>
+                                <div class="ml-auto">
+                                    <div class="dl">
+                                        {% if request.user.is_superuser or request.user.is_admin %}
+
+                                        <a href="{% url 'create_ticket' %}"
+                                            class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+                                            Add New Ticket<i class="fas fa-plus-circle mx-2"></i></a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="board-lists">
+
+                                <div id='list1' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
+                                    <div class="list-title">
+                                        To Do
+                                    </div>
+
+                                    {% for ticket in tickets %}
+                                    {% if ticket.board_id == board.id and ticket.state == 0%}
+                                    <div id="{{ticket.id}}" class="card" draggable="true"
+                                        ondragstart="dragStart(event)">
+                                        <div class="d-md-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title">{{ticket.title}} </h6>
+                                                <h6 class="card-title">Assigned To: {{ticket.assigned_user}}</h6>
+
+                                            </div>
+
+                                            {% if request.user.is_superuser %}
+                                            <a href="">
+                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
+                                                    <span class="align-middle">{{ticket.priority}}</span>
+
+                                                </div>
+                                            </a>
+                                            {% else %}
+                                            <a>
+                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
+                                                    <span class="align-middle">{{ticket.priority}}</span>
+
+                                                </div>
+                                            </a>
+                                            {% endif %}
+
+                                        </div>
+                                        <h6 class="card-title">Attachments </h6>
+                                        <div class="list-group my-3">
+                                            {% for attachment in attachments %}
+                                            {% if attachment.ticket.id == ticket.id %}
+                                            <a href="http://127.0.0.1:8000/static{{attachment.file.url}}"
+                                                class="list-group-item list-group-item-action">{{attachment.file}}</a>
+
+                                            {% endif %}
+                                            {% endfor %}
+
+                                        </div>
+                                        <div class="d-md-flex justify-content-between">
+                                            <a href="{% url 'claim_ticket' ticket.id %}">
+                                                <div class="d-none d-sm-inline-block btn-sm btn-success shadow-sm ">
+                                                    <span class="align-middle">Claim</span>
+
+                                                </div>
+                                            </a>
+                                            {% if request.user.is_superuser %}
+                                            <a href="{% url 'update_ticket' ticket.id %}">
+                                                <div class="d-none d-sm-inline-block btn-sm btn-secondary shadow-sm ">
+                                                    <span class="align-middle">Edit</span>
+
+                                                </div>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+
+
+
+                                </div>
+                                <div id='list2' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
+                                    <div class="list-title">
+                                        In Progress
+                                    </div>
+                                    {% for ticket in tickets %}
+                                    {% if ticket.board_id == board.id and ticket.state == 1%}
+                                    <div id="{{ticket.id}}" class="card" draggable="true"
+                                        ondragstart="dragStart(event)">
+                                        <div class="d-md-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title">{{ticket.title}} </h6>
+                                                <h6 class="card-title">Assigned To: {{ticket.assigned_user}}</h6>
+
+                                            </div>
+                                            {% if request.user.is_superuser %}
+                                            <a href="">
+                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
+                                                    <span class="align-middle">{{ticket.priority}}</span>
+
+                                                </div>
+                                            </a>
+                                            {% else %}
+                                            <a>
+                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
+                                                    <span class="align-middle">{{ticket.priority}}</span>
+
+                                                </div>
+                                            </a>
+                                            {% endif %}
+
+
+
+                                        </div>
+                                        <h6 class="card-title">Attachments </h6>
+                                        <div class="list-group my-3">
+                                            {% for attachment in attachments %}
+                                            {% if attachment.ticket.id == ticket.id %}
+                                            <a href="http://127.0.0.1:8000/static{{attachment.file.url}}"
+                                                class="list-group-item list-group-item-action">{{attachment.file}}</a>
+
+                                            {% endif %}
+                                            {% endfor %}
+
+                                        </div>
+                                        <div class="d-md-flex justify-content-between">
+                                            <a href="{% url 'claim_ticket' ticket.id %}">
+                                                <div class="d-none d-sm-inline-block btn-sm btn-success shadow-sm ">
+                                                    <span class="align-middle">Claim</span>
+
+                                                </div>
+                                            </a>
+                                            {% if request.user.is_superuser %}
+                                            <a href="{% url 'update_ticket' ticket.id %}">
+                                                <div class="d-none d-sm-inline-block btn-sm btn-secondary shadow-sm ">
+                                                    <span class="align-middle">Edit</span>
+
+                                                </div>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+
+                                </div>
+
+                                <div id='list3' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
+                                    <div class="list-title">
+                                        In Review
+                                    </div>
+                                    {% for ticket in tickets %}
+                                    {% if ticket.board_id == board.id and ticket.state == 2%}
+                                    <div id="{{ticket.id}}" class="card" draggable="true"
+                                        ondragstart="dragStart(event)">
+                                        <div class="d-md-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title">{{ticket.title}} </h6>
+                                                <h6 class="card-title">Assigned To: {{ticket.assigned_user}}</h6>
+
+                                            </div>
+
+                                            {% if request.user.is_superuser %}
+                                            <a href="">
+                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
+                                                    <span class="align-middle">{{ticket.priority}}</span>
+
+                                                </div>
+                                            </a>
+                                            {% else %}
+                                            <a>
+                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
+                                                    <span class="align-middle">{{ticket.priority}}</span>
+
+                                                </div>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                        <h6 class="card-title">Attachments </h6>
+                                        <div class="list-group my-3">
+                                            {% for attachment in attachments %}
+                                            {% if attachment.ticket.id == ticket.id %}
+                                            <a href="http://127.0.0.1:8000/static{{attachment.file.url}}"
+                                                class="list-group-item list-group-item-action">{{attachment.file}}</a>
+
+                                            {% endif %}
+                                            {% endfor %}
+
+                                        </div>
+                                        <div class="d-md-flex justify-content-between">
+                                            <a href="{% url 'claim_ticket' ticket.id %}">
+                                                <div class="d-none d-sm-inline-block btn-sm btn-success shadow-sm ">
+                                                    <span class="align-middle">Claim</span>
+
+                                                </div>
+                                            </a>
+                                            {% if request.user.is_superuser %}
+                                            <a href="{% url 'update_ticket' ticket.id %}">
+                                                <div class="d-none d-sm-inline-block btn-sm btn-secondary shadow-sm ">
+                                                    <span class="align-middle">Edit</span>
+
+                                                </div>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+
+                                </div>
+                                <div id='list4' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
+                                    <div class="list-title">
+                                        Completed
+                                    </div>
+                                    {% for ticket in tickets %}
+                                    {% if ticket.board_id == board.id and ticket.state == 3%}
+                                    <div id="{{ticket.id}}" class="card" draggable="true"
+                                        ondragstart="dragStart(event)">
+
+                                        <div class="d-md-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title">{{ticket.title}} </h6>
+                                                <h6 class="card-title">Assigned To: {{ticket.assigned_user}}</h6>
+
+                                            </div>
+
+                                            {% if request.user.is_superuser %}
+                                            <a href="">
+                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
+                                                    <span class="align-middle">{{ticket.priority}}</span>
+
+                                                </div>
+                                            </a>
+                                            {% else %}
+                                            <a>
+                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
+                                                    <span class="align-middle">{{ticket.priority}}</span>
+
+                                                </div>
+                                            </a>
+
+                                            {% endif %}
+
+
+                                        </div>
+                                        <h6 class="card-title">Attachments </h6>
+                                        <div class="list-group my-3">
+                                            {% for attachment in attachments %}
+                                            {% if attachment.ticket.id == ticket.id %}
+                                            <a href="http://127.0.0.1:8000/static{{attachment.file.url}}"
+                                                class="list-group-item list-group-item-action">{{attachment.file}}</a>
+
+                                            {% endif %}
+                                            {% endfor %}
+
+                                        </div>
+                                        <div class="d-md-flex justify-content-between">
+                                            <a href="{% url 'claim_ticket' ticket.id %}">
+                                                <div class="d-none d-sm-inline-block btn-sm btn-success shadow-sm ">
+                                                    <span class="align-middle">Claim</span>
+
+                                                </div>
+                                            </a>
+                                            {% if request.user.is_superuser %}
+                                            <a href="{% url 'update_ticket' ticket.id %}">
+                                                <div class="d-none d-sm-inline-block btn-sm btn-secondary shadow-sm ">
+                                                    <span class="align-middle">Edit</span>
+
+                                                </div>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Manage Ticket/h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            <div class="modal-body">
+                <p id="users"></p>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Understood</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+    function showModal(id) {
+        console.log("id: " + id);
+        getUsers(id)
+        $('#myModal').modal('show');
+    }
+</script>
+
+
+<script>
+    function getUsers(id) {
+        let data = new FormData();
+        let csrftoken = getCookie('csrftoken');
+
+        data.append("id", id);
+        data.append("csrfmiddlewaretoken", csrftoken);
+        axios.post('get_users/', data) // 4
+            .then(res => {
+                if (res.data.status) {
+                    console.log(res.data.users);
+
+                }
+            }) // 5
+            .catch(errors => console.log(errors));
+    }
+</script>
+
+{% endblock %}

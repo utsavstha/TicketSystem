@@ -1,0 +1,78 @@
+{% extends 'main.html' %}
+{% block content %}
+{% include 'nav.html' %}
+{% load bootstrap %}
+
+<div id="page-content-wrapper">
+    <div id="content">
+        <div class="container-fluid p-0 px-lg-0 px-md-0">
+            <!-- Topbar -->
+            {% include 'child_top_bar.html' %}
+            <div class="col-md-12 mt-4">
+
+                <!-- {{form}} -->
+                <div class="col-md-12 mt-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- title -->
+                            <div class="d-md-flex align-items-center">
+                                <div>
+                                    <h4 class="card-title">Tickets</h4>
+                                    <h5 class="card-subtitle">Update Ticket</h5>
+                                </div>
+
+                            </div>
+                            <!-- title -->
+                            <form action="" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {{ form | bootstrap }}
+                                <div class="list-group my-3">
+                                    {% for attachment in attachments %}
+                                    <a href="http://127.0.0.1:8000/static{{attachment.file.url}}"
+                                        class="list-group-item list-group-item-action">{{attachment.file}}</a>
+                                    <a href="#" data-toggle="modal" data-target="#attachmentDeleteModal{{ticket.id}}"
+                                        class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm mb-4">
+                                        <i class="fas fa-trash-alt"></i></a>
+
+                                    <div class="modal fade" id="attachmentDeleteModal{{ticket.id}}" tabindex="-1"
+                                        role="dialog" aria-labelledby="attachmentDeleteModal" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="attachmentDeleteModal">Would you like
+                                                        to delete {{attachment.file}}?</h5>
+                                                    <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-sm btn-secondary"
+                                                        data-dismiss="modal">Close</button>
+                                                    <a class="btn btn-sm btn-danger"
+                                                        href="{% url 'delete_attachment' attachment.id %}">Delete</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+
+                                </div>
+                                {{ file_form | bootstrap }}
+                                <input class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm " type="submit"
+                                    value="SAVE">
+                            </form>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+{% endblock %}

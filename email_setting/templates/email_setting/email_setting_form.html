@@ -1,0 +1,44 @@
+{% extends 'main.html' %}
+{% block content %}
+{% include 'nav.html' %}
+{% load bootstrap %}
+
+<div id="page-content-wrapper">
+    <div id="content">
+        <div class="container-fluid p-0 px-lg-0 px-md-0">
+            <!-- Topbar -->
+            {% include 'child_top_bar.html' %}
+            <div class="col-md-12 mt-4">
+
+                <!-- {{form}} -->
+                <div class="col-md-12 mt-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- title -->
+                            <div class="d-md-flex align-items-center">
+                                <div>
+                                    <h4 class="card-title">Email Settings</h4>
+                                    <h5 class="card-subtitle">Create new Email Settings</h5>
+                                </div>
+
+                            </div>
+                            <!-- title -->
+                            <form action="" method="POST">
+                                {% csrf_token %}
+                                {{ form | bootstrap }}
+                                <input class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm " type="submit"
+                                    value="SAVE">
+                            </form>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+{% endblock %}

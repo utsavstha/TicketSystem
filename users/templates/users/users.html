@@ -1,0 +1,190 @@
+{% extends 'main.html' %}
+{% block content %}
+{% include 'nav.html' %}
+
+<div id="page-content-wrapper">
+    <div id="content">
+        <div class="container-fluid p-0 px-lg-0 px-md-0">
+            <!-- Topbar -->
+            {% include 'topbar.html' %}
+            <div class="col-md-12 mt-4">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- title -->
+                        <div class="d-md-flex align-items-center">
+                            <div>
+                                <h4 class="card-title">Users</h4>
+                                <h5 class="card-subtitle">List of all available Users</h5>
+                            </div>
+                            <div class="ml-auto">
+                                <div class="dl">
+                                    <a href="{% url 'create_user' %}"
+                                        class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                                        Add New<i class="fas fa-plus-circle mx-2"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- title -->
+                    </div>
+                    {% if request.user.is_superuser %}
+                    <div class="table-responsive">
+                        <table class="table v-middle">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th class="border-top-0">First Name</th>
+                                    <th class="border-top-0">Last Name</th>
+                                    <th class="border-top-0">Email</th>
+                                    <th class="border-top-0">Date Joined</th>
+                                    <th class="border-top-0">Last Login</th>
+                                    <th class="border-top-0">Manager</th>
+                                    <th class="border-top-0">Active</th>
+                                    <th class="border-top-0">Staff</th>
+                                    <th class="border-top-0">Admin</th>
+                                    <th class="border-top-0">Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="">
+                                                <h4 class="m-b-0 font-16">{{user.first_name}}</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="">
+                                                <h4 class="m-b-0 font-16">{{user.last_name}}</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="">
+                                                <h4 class="m-b-0 font-16">{{user.email}}</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="">
+                                                <h4 class="m-b-0 font-16">{{user.date_joined}}</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="">
+                                                <h4 class="m-b-0 font-16">{{user.last_login}}</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if user.is_admin %}
+                                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ">
+                                            True</i></a>
+                                        {% else %}
+                                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-warning shadow-sm ">
+                                            False</i></a>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if user.is_active %}
+                                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ">
+                                            True</i></a>
+                                        {% else %}
+                                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-warning shadow-sm ">
+                                            False</i></a>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if user.is_staff %}
+                                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ">
+                                            True</i></a>
+                                        {% else %}
+                                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-warning shadow-sm ">
+                                            False</i></a>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if user.is_superuser %}
+                                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ">
+                                            True</i></a>
+                                        {% else %}
+                                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-warning shadow-sm ">
+                                            False</i></a>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <a href="{% url 'update_user' user.id %}"
+                                            class="d-none d-sm-inline-block btn btn-sm btn-warning shadow-sm ">
+                                            <i class="fas fa-edit ml-1 mr-0"></i></a>
+                                        <a href="#" data-toggle="modal" data-target="#userDeleteModal{{user.id}}"
+                                            class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm ">
+                                            <i class="fas fa-trash-alt"></i></a>
+                                    </td>
+                                    <div class="modal fade" id="userDeleteModal{{user.id}}" tabindex="-1" role="dialog"
+                                        aria-labelledby="userDeleteModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="userDeleteModalLabel">Would you like
+                                                        to delete {{user.email}}?</h5>
+                                                    <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-sm btn-secondary"
+                                                        data-dismiss="modal">Close</button>
+                                                    <a class="btn btn-sm btn-danger"
+                                                        href="{% url 'delete_user' user.id %}">Delete</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row text-muted">
+                    <div class="col-6 text-left">
+                        <p class="mb-0">
+                            <a href="index.html" class="text-muted"><strong>Inventory Management
+                                </strong></a> &copy
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </footer>
+
+    </div>
+</div>
+
+{% endblock %}
