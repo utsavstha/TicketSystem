@@ -17,6 +17,44 @@
                             <!-- title -->
                             <div class="d-md-flex align-items-center">
                                 <div>
+                                    <form id="form-search" class="d-none d-sm-inline-block form-inline navbar-search"
+                                        method="POST">
+                                        {% csrf_token %}
+                                        <div class="input-group">
+                                            <input type="text" class="form-control bg-light "
+                                                placeholder="Search by Ticket Name" aria-label="Search" id="txt-search"
+                                                name="search" value="{{search_data}}">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-primary" type="submit">
+                                                    <i class="fas fa-search fa-sm"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <br />
+
+                                <div class="ml-auto">
+                                    <div class="dl">
+                                        <select id="filter-select" class="custom-select">
+                                            {% for priority in priorities %}
+                                            <option value="{{priority.id}}">{{priority.name}}</option>
+                                            {% endfor %}
+
+                                        </select>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                            <!-- title -->
+                        </div>
+                        <div class="card-body">
+                            <!-- title -->
+                            <div class="d-md-flex align-items-center">
+                                <div>
                                     <h4 class="card-title">Boards</h4>
                                     <h5 class="card-subtitle">List of all available Boards</h5>
                                 </div>
@@ -31,7 +69,7 @@
                                             <div class="dropdown-menu">
                                                 {% for board in boards %}
                                                 <a class="dropdown-item"
-                                                    href="{% url 'get_board' board.id %}">{{board.title}}
+                                                    href="{% url 'boards' board.id %}">{{board.title}}
                                                     <span hidden>{{board.id}}</span></a>
                                                 {% endfor %}
                                             </div>
@@ -69,31 +107,27 @@
                                     </div>
 
                                     {% for ticket in tickets %}
-                                    {% if ticket.board_id == board.id and ticket.state == 0%}
+                                    {% for ticket_board in ticket.board.all %}
+                                    {% if ticket_board.id == board.id and ticket.state == 0%}
                                     <div id="{{ticket.id}}" class="card" draggable="true"
                                         ondragstart="dragStart(event)">
                                         <div class="d-md-flex justify-content-between">
                                             <div>
                                                 <h6 class="card-title">{{ticket.title}} </h6>
-                                                <h6 class="card-title">Assigned To: {{ticket.assigned_user}}</h6>
-
+                                                <p class="card-subtitle overme">{{ticket.description}} </p>
+                                                <h6 class=" card-title">Assigned To:</h6>
+                                                {% for user in ticket.assigned_user.all %}
+                                                <h6 class="card-title">{{user}}</h6>
+                                                {% endfor %}
                                             </div>
 
-                                            {% if request.user.is_superuser %}
-                                            <a href="">
-                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
-                                                    <span class="align-middle">{{ticket.priority}}</span>
-
-                                                </div>
-                                            </a>
-                                            {% else %}
                                             <a>
-                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
+                                                <div style="background-color: {{ticket.priority.color}}"
+                                                    class="d-none d-sm-inline-block btn-sm shadow-sm ">
                                                     <span class="align-middle">{{ticket.priority}}</span>
 
                                                 </div>
                                             </a>
-                                            {% endif %}
 
                                         </div>
                                         <h6 class="card-title">Attachments </h6>
@@ -126,6 +160,7 @@
 
                                     </div>
                                     {% endif %}
+                                    {% endfor %}
                                     {% endfor %}
 
 
@@ -136,31 +171,26 @@
                                         In Progress
                                     </div>
                                     {% for ticket in tickets %}
-                                    {% if ticket.board_id == board.id and ticket.state == 1%}
+                                    {% for ticket_board in ticket.board.all %}
+                                    {% if ticket_board.id == board.id and ticket.state == 1%}
                                     <div id="{{ticket.id}}" class="card" draggable="true"
                                         ondragstart="dragStart(event)">
                                         <div class="d-md-flex justify-content-between">
                                             <div>
                                                 <h6 class="card-title">{{ticket.title}} </h6>
-                                                <h6 class="card-title">Assigned To: {{ticket.assigned_user}}</h6>
-
+                                                <h6 class="card-title">Assigned To:</h6>
+                                                {% for user in ticket.assigned_user.all %}
+                                                <h6 class="card-title">{{user}}</h6>
+                                                {% endfor %}
                                             </div>
-                                            {% if request.user.is_superuser %}
-                                            <a href="">
-                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
-                                                    <span class="align-middle">{{ticket.priority}}</span>
 
-                                                </div>
-                                            </a>
-                                            {% else %}
                                             <a>
-                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
+                                                <div style="background-color: {{ticket.priority.color}}"
+                                                    class="d-none d-sm-inline-block btn-sm shadow-sm ">
                                                     <span class="align-middle">{{ticket.priority}}</span>
 
                                                 </div>
                                             </a>
-                                            {% endif %}
-
 
 
                                         </div>
@@ -194,6 +224,7 @@
 
                                     </div>
                                     {% endif %}
+                                    {% endfor %}
                                     {% endfor %}
 
                                 </div>
@@ -203,31 +234,26 @@
                                         In Review
                                     </div>
                                     {% for ticket in tickets %}
-                                    {% if ticket.board_id == board.id and ticket.state == 2%}
+                                    {% for ticket_board in ticket.board.all %}
+                                    {% if ticket_board.id == board.id and ticket.state == 2%}
                                     <div id="{{ticket.id}}" class="card" draggable="true"
                                         ondragstart="dragStart(event)">
                                         <div class="d-md-flex justify-content-between">
                                             <div>
                                                 <h6 class="card-title">{{ticket.title}} </h6>
-                                                <h6 class="card-title">Assigned To: {{ticket.assigned_user}}</h6>
-
+                                                <h6 class="card-title">Assigned To:</h6>
+                                                {% for user in ticket.assigned_user.all %}
+                                                <h6 class="card-title">{{user}}</h6>
+                                                {% endfor %}
                                             </div>
 
-                                            {% if request.user.is_superuser %}
-                                            <a href="">
-                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
-                                                    <span class="align-middle">{{ticket.priority}}</span>
-
-                                                </div>
-                                            </a>
-                                            {% else %}
                                             <a>
-                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
+                                                <div style="background-color: {{ticket.priority.color}}"
+                                                    class="d-none d-sm-inline-block btn-sm shadow-sm ">
                                                     <span class="align-middle">{{ticket.priority}}</span>
 
                                                 </div>
                                             </a>
-                                            {% endif %}
                                         </div>
                                         <h6 class="card-title">Attachments </h6>
                                         <div class="list-group my-3">
@@ -259,6 +285,7 @@
                                     </div>
                                     {% endif %}
                                     {% endfor %}
+                                    {% endfor %}
 
                                 </div>
                                 <div id='list4' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
@@ -266,33 +293,29 @@
                                         Completed
                                     </div>
                                     {% for ticket in tickets %}
-                                    {% if ticket.board_id == board.id and ticket.state == 3%}
+                                    {% for ticket_board in ticket.board.all %}
+                                    {% if ticket_board.id == board.id and ticket.state == 3%}
                                     <div id="{{ticket.id}}" class="card" draggable="true"
                                         ondragstart="dragStart(event)">
 
                                         <div class="d-md-flex justify-content-between">
                                             <div>
                                                 <h6 class="card-title">{{ticket.title}} </h6>
-                                                <h6 class="card-title">Assigned To: {{ticket.assigned_user}}</h6>
+
+                                                <h6 class="card-title">Assigned To:</h6>
+                                                {% for user in ticket.assigned_user.all %}
+                                                <h6 class="card-title">{{user}}</h6>
+                                                {% endfor %}
 
                                             </div>
 
-                                            {% if request.user.is_superuser %}
-                                            <a href="">
-                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
-                                                    <span class="align-middle">{{ticket.priority}}</span>
-
-                                                </div>
-                                            </a>
-                                            {% else %}
                                             <a>
-                                                <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
+                                                <div style="background-color: {{ticket.priority.color}}"
+                                                    class="d-none d-sm-inline-block btn-sm shadow-sm ">
                                                     <span class="align-middle">{{ticket.priority}}</span>
 
                                                 </div>
                                             </a>
-
-                                            {% endif %}
 
 
                                         </div>
@@ -325,6 +348,7 @@
                                         </div>
                                     </div>
                                     {% endif %}
+                                    {% endfor %}
                                     {% endfor %}
 
                                 </div>

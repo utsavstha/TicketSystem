@@ -27,7 +27,7 @@
 
                             </div>
                             <!-- title -->
-                            <form action="" method="POST" enctype="multipart/form-data">
+                            <form action="{% url 'create_ticket' %}" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="form-group">
                                     <label for="exampleFormControlInput1">Title</label>
@@ -54,9 +54,6 @@
                                 <div class="form-group">
                                     <label for="group">Group</label>
                                     <select multiple data-multi-select-plugin id="group" name="group">
-                                        {% for group in groups %}
-                                        <option id="{{group.id}}" value="{{group.name}}">{{group.name}}</option>
-                                        {% endfor %}
 
                                     </select>
 
@@ -88,15 +85,15 @@
                                     </label>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="form-group mt-3">
                                     <label for="description">Description</label>
                                     <textarea class="form-control" id="description" name="description"
                                         rows="3"></textarea>
                                 </div>
                             </form>
                             {{ file_form | bootstrap }}
-                            <input class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm " type="submit"
-                                value="SAVE">
+                            <input class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm "
+                                onclick="onPostForm()" value="SAVE">
                             </form>
                         </div>
 
@@ -109,6 +106,9 @@
 
     </div>
 </div>
+<script>
+    const ticket = null;
+</script>
 <script src="{% static '/js/multi-selector.js'%}"></script>
 
 {% endblock %}

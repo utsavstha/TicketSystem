@@ -1,15 +1,33 @@
 var selectedGroups = []
-const allBoards = JSON.parse(JSON.parse(document.getElementById('boards').textContent));
 
+var selectedBoards = []
+var filteredBoards = []
+
+var selectedAccounts = []
+var filteredAccounts = []
+
+var groups_select = undefined
+var boards_select = undefined
+var users_select = undefined
+
+
+const allBoards = JSON.parse(JSON.parse(document.getElementById('boards').textContent));
 const allGroups = JSON.parse(JSON.parse(document.getElementById('groups').textContent));
 const allAccounts = JSON.parse(JSON.parse(document.getElementById('accounts').textContent));
+if (ticket) {
+    selectedGroups = ticket.fields.assigned_group;
+    // selectedGroups.push(ticket.fields.groups.all)
+}
+filteredAccounts = allAccounts
 // Initialize function, create initial tokens with itens that are already selected by the user
 function init(element) {
     // Create div that wroaps all the elements inside (select, elements selected, search div) to put select inside
     const wrapper = document.createElement("div");
     wrapper.addEventListener("click", clickOnWrapper);
     wrapper.classList.add("multi-select-component");
+    // const select = wrapper.querySelector("select");
 
+    // console.log(select);
     // Create elements of search
     const search_div = document.createElement("div");
     search_div.classList.add("search-container");
@@ -39,7 +57,14 @@ function init(element) {
     // set element as child of wrapper
     wrapper.appendChild(element);
     wrapper.appendChild(search_div);
-
+    if (element.id == "group") {
+        groups_select = element;
+    } else if (element.id == "boards") {
+        boards_select = element;
+    } else if (element.id == "assigned-users") {
+        users_select = element;
+    }
+    // console.log(element);
     createInitialTokens(element);
     addPlaceholder(wrapper);
 }
@@ -65,6 +90,7 @@ function createInitialTokens(select) {
     const wrapper = select.parentNode;
 
     for (let i = 0; i < options_selected.length; i++) {
+        console.log("selected", options_selected[i]);
         createToken(wrapper, options_selected[i]);
     }
 
@@ -128,20 +154,14 @@ function createToken(wrapper, target) {
     token.classList.add("selected-wrapper");
     const token_span = document.createElement("span");
     token_span.classList.add("selected-label");
-    if (target.dataset != undefined) {
-        token_span.innerText = target.dataset.value;
-    } else {
-        // console.log("create token", target);
-        token_span.innerText = target[0];
-    }
+
+    token_span.innerText = target.dataset.value;
+
     const close = document.createElement("a");
     close.classList.add("selected-close");
     close.setAttribute("tabindex", "-1");
-    if (target.dataset != undefined) {
-        close.setAttribute("data-option", target.dataset.value);
-    } else {
-        close.setAttribute("data-option", target[0]);
-    }
+    close.setAttribute("data-option", target.id);
+    close.setAttribute("id", target.id);
     close.setAttribute("data-hits", 0);
     close.setAttribute("href", "#");
     close.innerText = "x";
@@ -150,25 +170,9 @@ function createToken(wrapper, target) {
     token.appendChild(close);
     wrapper.insertBefore(token, search);
     // console.log(target.id);
-    setSelected(target);
+    // setSelected(target);
 }
 
-function setSelected(target) {
-
-    // console.log(groups);
-    if (target.parentElement == undefined) return;
-    if (target.parentElement.id == 'group') {
-        for (var i = 0; i < allGroups.length; i++) {
-            // console.log("group id", groups[i]);
-            // console.log("target id", target.id);
-            if (allGroups[i].pk == target.id) {
-                selectedGroups.push(allGroups[i])
-            }
-        }
-        // console.log(target.id);
-    }
-
-}
 
 function refreshBoardsAndAccounts() {
 
@@ -210,6 +214,7 @@ function clearAutocompleteList(select) {
 
 // Populate the autocomplete list following a given query from the user
 function populateAutocompleteList(select, query, dropdown = false) {
+    // console.log("populateAutocompleteList", select);
     const {
         autocomplete_options
     } = getOptions(select);
@@ -220,6 +225,8 @@ function populateAutocompleteList(select, query, dropdown = false) {
         options_to_show = autocomplete_options;
     else
         options_to_show = autocomplete(query, autocomplete_options);
+
+    // console.log("population auto complete", autocomplete_options);
 
     const wrapper = select.parentNode;
     const input_search = wrapper.querySelector(".search-container");
@@ -264,9 +271,27 @@ function populateAutocompleteList(select, query, dropdown = false) {
 function selectOption(e) {
     const wrapper = e.target.parentNode.parentNode.parentNode;
     const input_search = wrapper.querySelector(".selected-input");
-    const option = wrapper.querySelector(`select option[value="${e.target.dataset.value}"]`);
-    // console.log("select option", e.target.parentElement);
-    option.setAttribute("selected", "");
+
+    if (e.target.parentNode.id == "group") {
+        selectedGroups.push(e.target.id);
+
+        for (let i = 0; i < allBoards.length; i++) {
+            if (allBoards[i].fields.group.toString() == e.target.id) {
+                filteredBoards.push(allBoards[i])
+            }
+        }
+
+        populateAutocompleteList(boards_select, "", true)
+        // populateAutocompleteList(groups_select, "", true)
+
+    } else if (e.target.parentNode.id == "boards") {
+        selectedBoards.push(e.target.id);
+    } else if (e.target.parentNode.id == "assigned-users") {
+        selectedAccounts.push(e.target.id);
+    }
+    // populateAutocompleteList(select, "")
+
+    // console.log(e.target.parentNode);
     createToken(wrapper, e.target);
     if (input_search.value) {
         input_search.value = "";
@@ -312,77 +337,38 @@ function autocomplete(query, options) {
 function getOptions(select) {
     // Select all the options available
     // console.log(select);
+    var all_options = []
+    var options_selected = []
     if (select.id == "group") {
-        const all_options = Array.from(
-            select.querySelectorAll("option")
-        ).map(el => [el.value, el.id]);
-
-        // Get the options that are selected from the user
-        const options_selected = Array.from(
-            select.querySelectorAll("option:checked")
-        ).map(el => [el.value, el.id]);
-
-        // Create an autocomplete options array with the options that are not selected by the user
-        const autocomplete_options = [];
-        all_options.forEach(option => {
-            if (!doesInclude(options_selected, option)) {
-                autocomplete_options.push(option);
-            }
-
-        });
-        autocomplete_options.sort();
-
-        return {
-            options_selected,
-            autocomplete_options,
-        };
+        all_options = allGroups.map(el => [el.fields.name, el.pk.toString()])
+        options_selected = selectedGroups
     } else if (select.id == "boards") {
-        const all_options = allBoards.map(el => [el.fields.title, el.pk.toString()])
-        const options_selected = Array.from(
-            select.querySelectorAll("option:checked")
-        ).map(el => [el.value, el.id]);
-        const autocomplete_options = [];
-
-        all_options.forEach(option => {
-            if (!doesInclude(options_selected, option)) {
-                autocomplete_options.push(option);
-            }
-
-        });
-
-
-        autocomplete_options.sort();
-
-        return {
-            options_selected,
-            autocomplete_options,
-        };
-    } else {
-        const all_options = allAccounts.map(el => [el.fields.title, el.pk.toString()])
-        const options_selected = Array.from(
-            select.querySelectorAll("option:checked")
-        ).map(el => [el.value, el.id]);
-        const autocomplete_options = [];
-
-        all_options.forEach(option => {
-            if (!doesInclude(options_selected, option)) {
-                autocomplete_options.push(option);
-            }
-
-        });
-
-
-        autocomplete_options.sort();
-        console.log("autocomplete_options", {
-            options_selected,
-            autocomplete_options,
-        });
-
-        return {
-            options_selected,
-            autocomplete_options,
-        };
+        all_options = filteredBoards.map(el => [el.fields.title, el.pk.toString()])
+        options_selected = selectedBoards
+    } else if (select.id == "assigned-users") {
+        all_options = filteredAccounts.map(el => [el.fields.email, el.pk.toString()])
+        options_selected = selectedAccounts
     }
+
+    // const options_selected = Array.from(
+    //     select.querySelectorAll("option:checked")
+    // ).map(el => [el.value, el.id]);
+    const autocomplete_options = [];
+
+    all_options.forEach(option => {
+        if (!doesInclude(options_selected, option)) {
+            autocomplete_options.push(option);
+        }
+
+    });
+
+    autocomplete_options.sort();
+
+    return {
+        options_selected,
+        autocomplete_options,
+    };
+
 
 
 
@@ -391,7 +377,7 @@ function getOptions(select) {
 
 function doesInclude(options_selected, option) {
     for (var i = 0; i < options_selected.length; i++) {
-        if (options_selected[i][0] == option[0]) {
+        if (options_selected[i] == option[1]) {
             return true;
         }
     }
@@ -404,12 +390,48 @@ function removeToken(e) {
     // Get the value to remove
     const value_to_remove = e.target.dataset.option;
     const wrapper = e.target.parentNode.parentNode;
+    const select = wrapper.querySelector("select");
+
     const input_search = wrapper.querySelector(".selected-input");
     const dropdown = wrapper.querySelector(".dropdown-icon");
     // Get the options in the select to be unselected
     const option_to_unselect = wrapper.querySelector(`select option[value="${value_to_remove}"]`);
-    option_to_unselect.removeAttribute("selected");
+    // option_to_unselect.removeAttribute("selected");
     // Remove token attribute
+    if (select.id == "group") {
+        var updatedFilteredBoards = []
+
+        for (let i = 0; i < selectedGroups.length; i++) {
+            if (selectedGroups[i] == e.target.id) {
+                selectedGroups.splice(i, 1)
+                // updatedSelectedGroups.push(e.target.id)
+            }
+        }
+
+        for (let i = 0; i < filteredBoards.length; i++) {
+            if (filteredBoards[i].fields.group != e.target.id) {
+                // filteredBoards.splice(i, 1)
+                updatedFilteredBoards.push(filteredBoards[i])
+            }
+        }
+        filteredBoards = updatedFilteredBoards
+
+        populateAutocompleteList(boards_select, "", true)
+    } else if (select.id == "boards") {
+        for (let i = 0; i < selectedBoards.length; i++) {
+            if (selectedBoards[i] == e.target.id) {
+                delete selectedBoards[i];
+            }
+        }
+    } else if (select.id == "assigned-users") {
+        for (let i = 0; i < selectedAccounts.length; i++) {
+            if (selectedAccounts[i] == e.target.id) {
+                delete selectedAccounts[i];
+            }
+        }
+    }
+
+
     e.target.parentNode.remove();
     input_search.focus();
     dropdown.classList.remove("active");
@@ -446,6 +468,78 @@ function deletePressed(e) {
     }
     return true;
 }
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+function isEmpty(element) {
+    const str = element.value
+    return (!str || str.length === 0);
+}
+function onPostForm() {
+    const csrftoken = getCookie('csrftoken');
+    const ticket_name = document.getElementById("ticket_name")
+    const description = document.getElementById("description")
+    const priority = document.getElementById("priority")
+    const classification = document.getElementById("classification")
+    const staff_complete = document.getElementById("staff_complete")
+    const files = document.getElementById('id_file').files
+    if (isEmpty(ticket_name)) {
+        alert("Please enter a ticket name")
+        return;
+    }
+    if (isEmpty(description)) {
+        alert("Please enter a ticket description")
+        return;
+    }
+
+    if (selectedGroups.length <= 0) {
+        alert("Please select a group")
+        return;
+    }
+
+    if (selectedBoards.length <= 0) {
+        alert("Please select a Board")
+        return;
+    }
+
+    var data = new FormData();
+    data.append('ticket_name', ticket_name.value);
+    data.append('description', description.value);
+    data.append('priority', priority.value);
+    data.append('classification', classification.value);
+    console.log(selectedAccounts);
+    data.append('groups', selectedGroups);
+    data.append('boards', selectedBoards);
+    data.append('users', selectedAccounts);
+    data.append('staff_complete', staff_complete.checked);
+    for (let i = 0; i < files.length; i++) {
+        data.append(`files[${i}]`, files[i], files[i].name);
+    }
+    // data.append('files', file);
+
+    fetch("", {
+        method: "POST",
+        headers: {
+            "X-CSRFTOKEN": csrftoken,
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: data
+    }).then(res => {
+        console.log("Request complete! response:", res);
+    });
+}
 
 // You can call this function if you want to add new options to the select plugin
 // Target needs to be a unique identifier from the select you want to append new option for example #multi-select-plugin
@@ -466,6 +560,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         init(select);
     });
+
+    // const submitButton = document.getElementById("#submitform");
+    // console.log(submitButton);
+    // submitButton.addEventListener('click', () => {
+    //     console.log("submit");
+    // });
 
     // Dismiss on outside click
     document.addEventListener('click', () => {

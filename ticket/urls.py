@@ -6,6 +6,8 @@ urlpatterns = [
     path('tickets/', views.tickets, name="tickets"),
     path('boards/change_ticket_state/', views.change_state,
          name="change_ticket_state"),
+    path('change_ticket_state/', views.change_state,
+         name="change_ticket_state"),
     path('get_board/change_ticket_state/', views.change_state,
          name="change_ticket_state"),
 

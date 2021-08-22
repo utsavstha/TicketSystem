@@ -69,6 +69,7 @@ class Group(models.Model):
 
 class Priority(models.Model):
     name = models.CharField(max_length=200, null=True)
+    color = models.CharField(max_length=10, null=True)
 
     def __str__(self):
         return self.name
@@ -100,7 +101,7 @@ class Ticket(models.Model):
     state = models.IntegerField(default=0)
     board = models.ManyToManyField(Board)
     assigned_group = models.ManyToManyField(Group)
-    assigned_user = models.ManyToManyField(Account, blank=True, null=True)
+    assigned_user = models.ManyToManyField(Account)
     classification = models.ForeignKey(
         Classification, on_delete=models.CASCADE)
     can_staff_complete = models.BooleanField()

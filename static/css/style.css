@@ -315,7 +315,13 @@ header navbar design
     transition: background .1s ease-in-out, color .1s ease-in-out;
     line-height: 1.4;
 }
-
+.overme {
+    width: 150px;
+    overflow:hidden; 
+    white-space:nowrap; 
+    text-overflow: ellipsis;
+    color: red;
+}
 
 .navbar-expand .navbar-nav .dropdown-menu {
     position: absolute;

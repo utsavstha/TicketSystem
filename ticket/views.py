@@ -22,17 +22,59 @@ def create_ticket(request):
     boards = Board.objects.all()
     file_form = TicketAttachmentForm()
     if request.method == 'POST':
-        file_form = TicketAttachmentForm(request.POST, request.FILES)
-        files = request.FILES.getlist('file')  # field name in model
+        ticket_name = request.POST.get('ticket_name')
+        description = request.POST.get('description')
+        priority = request.POST.get('priority')
+        groups = request.POST.get('groups')
+        boards = request.POST.get('boards')
+        classification = request.POST.get('classification')
+        staff_complete = request.POST.get('staff_complete')
+        users = request.POST.get('users')
+        files = [request.FILES.get('files[%d]' % i)
+                 for i in range(0, len(request.FILES))]
+        staff = True if staff_complete == 'true' else False
+        groups = groups.split(",") if "," in groups else groups
+        boards = boards.split(",") if "," in boards else boards
+        users = users.split(",") if "," in users else users
 
-        if form.is_valid() and file_form.is_valid():
-            ticket_instance = form.save(commit=False)
-            ticket_instance.save()
-            for f in files:
-                file_instance = TicketAttachment(
-                    file=f, ticket=ticket_instance)
-                file_instance.save()
-            return redirect('/boards')
+        classification_instance = Classification.objects.filter(
+            name=classification).first()
+
+        priority_instance = Priority.objects.filter(name=priority).first()
+
+        ticket = Ticket(title=ticket_name, description=description,
+                        priority=priority_instance, classification=classification_instance,
+                        can_staff_complete=staff)
+        ticket.save()
+        group_instance = Group.objects.filter(pk__in=groups)
+        board_instance = Board.objects.filter(pk__in=boards)
+        ticket.assigned_group.set(group_instance)
+        ticket.board.set(board_instance)
+
+        if len(users) > 0:
+            user_instance = Account.objects.filter(pk__in=users)
+            ticket.assigned_user.set(user_instance)
+
+        ticket.save()
+        # ticket, created = Ticket.objects.get_or_create(
+        #     title=ticket_name, description=description,
+        #     priority=priority_instance, assigned_group=groups, board=boards,
+        #     classification=classification_instance,
+        #     can_staff_complete=staff, assigned_user=users)
+        # if created:
+        #     for f in files:
+        #         file_instance = TicketAttachment(
+        #             file=f, ticket=ticket)
+        #         file_instance.save()
+
+        # if form.is_valid() and file_form.is_valid():
+        #     ticket_instance = form.save(commit=False)
+        #     ticket_instance.save()
+        for f in files:
+            file_instance = TicketAttachment(
+                file=f, ticket=ticket)
+            file_instance.save()
+        return redirect('/boards')
 
     context = {'activate_tickets': 'active',
                'priorities': priorities, 'classifications': classifications,
@@ -45,14 +87,21 @@ def create_ticket(request):
 
 @login_required(login_url='/login')
 def update_ticket(request, pk):
+
+    priorities = Priority.objects.all()
+    classifications = Classification.objects.all()
+    groups = Group.objects.all()
+    accounts = Account.objects.all()
+    boards = Board.objects.all()
+
     ticket = Ticket.objects.get(id=pk)
-    form = TicketForm(instance=ticket)
+    # form = TicketForm(instance=ticket)
     ticketAttachments = TicketAttachment.objects.filter(ticket=ticket)
 
     file_form = TicketAttachmentForm()
 
     if request.method == 'POST':
-        form = TicketForm(request.POST, instance=ticket)
+        # form = TicketForm(request.POST, instance=ticket)
         file_form = TicketAttachmentForm(request.POST, request.FILES)
         files = request.FILES.getlist('file')  # field name in model
         if form.is_valid() and file_form.is_valid():
@@ -63,7 +112,14 @@ def update_ticket(request, pk):
                 file_instance.save()
             return redirect('/boards')
     context = {'activate_tickets': 'active',
-               'form': form, 'file_form': file_form, 'attachments': ticketAttachments}
+               'priorities': priorities, 'classifications': classifications,
+               'groups': groups,
+               'ticket_serialized': serializers.serialize('json', [ticket, ]),
+               'boards': boards, 'groups_serialized': serializers.serialize('json', groups),
+               'boards_serialized': serializers.serialize('json', boards),
+               'accounts_serialized': serializers.serialize('json', accounts),
+               'accounts': accounts, 'file_form': file_form, 'ticket': ticket, 'attachments': ticketAttachments}
+
     return render(request, 'ticket/ticket_update_form.html', context)
 
 
