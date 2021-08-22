@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 
 
 @login_required(login_url='/login')
-def boards(request, pk=''):
+def boards(request, pk='-1'):
     current_user = request.user
     context = {}
     board = None
@@ -16,83 +16,46 @@ def boards(request, pk=''):
     tickets = None
     attachment = TicketAttachment.objects.all()
     priorities = Priority.objects.all()
-    todo = []
-    progress = []
-    review = []
-    completed = []
+    search_keyword = ''
+    priority = '-1'
+
+    if request.method == 'POST':
+        print(request.POST)
+        keyword = request.POST.get('search_keyword')
+        search_keyword = '' if keyword == None else keyword
+        priority = request.POST.get('selected_priority')
 
     if current_user.is_superuser or current_user.is_admin:
-        boards = Board.objects.all()
-        tickets = Ticket.objects.all()
-        print(boards)
-        if pk != '':
+        boards = Board.get_all()
+        tickets = Ticket.searchTicket(
+            search_keyword=search_keyword, priority_id=priority)
+
+        if pk != '-1':
             selected_board = Board.objects.get(id=pk)
         else:
-            selected_board = None if len(boards) == 0 else boards[0]
+            selected_board = None
     else:
-        print(pk)
         group = Group.objects.filter(users=current_user)
-        boards = Board.objects.filter(id=pk, group__in=group)
-        tickets = Ticket.objects.filter(assigned_group__in=group)
-        selected_board = None if len(boards) == 0 else boards[0]
+        boards = Board.filter_all(group=group)
+        if pk != '-1':
+            tickets = Ticket.searchTicket(group=group,
+                                          search_keyword=search_keyword, priority_id=priority)
+            selected_board = Board.objects.get(id=pk)
+        else:
+            tickets = Ticket.searchTicket(user=current_user,
+                                          search_keyword=search_keyword, priority_id=priority)
+            selected_board = None
 
-    for ticket in tickets:
-        for ticket_board in ticket.boards.all:
-            if ticket_board.id == selected_board.id:
-                if ticket.state == 0:
-                    todo.append(ticket)
-                elif ticket.state == 0:
-                    progress.append(ticket)
-                elif ticket.state == 0:
-                    review.append(ticket)
-                elif ticket.state == 0:
-                    completed.append(ticket)
+    (todo, progress, review, completed) = Ticket.get_tickets(
+        tickets=tickets, selected_board=selected_board)
 
     context = {'activate_board': 'active',
                "boards": boards, 'todo': todo, 'progress': progress, 'review': review,
                'completed': completed,
+               'selected_priority': priority,
                'priorities': priorities,
+               'search_keyword': search_keyword,
                'board': selected_board, 'attachments': attachment}
-    return render(request, 'board/board.html', context)
-
-
-# @login_required(login_url='/login')
-# def search_ticket(request):
-#     if request.method == 'POST':
-#         search_keyword = request.POST.get('search_keyword')
-#         current_user = request.user
-#         if current_user.is_superuser or current_user.is_admin:
-#             tickets = Ticket.objects.filter(title__contains=search_keyword)
-#             context = {'activate_board': 'active',
-#                        "boards": boards, 'tickets': tickets,
-#                        'priorities': priorities,
-#                        'board': selected_board, 'attachments': attachment}
-#         return render(request, 'board/board.html', context)
-
-
-@login_required(login_url='/login')
-def get_board(request, pk):
-    current_user = request.user
-    context = {}
-    board = None
-    selected_board = None
-    tickets = None
-    priorities = Priority.objects.all()
-
-    if current_user.is_superuser or current_user.is_admin:
-        boards = Board.objects.all()
-        tickets = Ticket.objects.all()
-        selected_board = Board.objects.get(id=pk)
-
-    else:
-        group = Group.objects.filter(users=current_user)
-        boards = Board.objects.filter(id=pk, group__in=group)
-        tickets = Ticket.objects.filter(assigned_group__in=group)
-        selected_board = None if len(boards) == 0 else boards[0]
-
-    context = {'activate_board': 'active',
-               'priorities': priorities,
-               "boards": boards, 'tickets': tickets, 'board': selected_board}
     return render(request, 'board/board.html', context)
 
 
@@ -127,7 +90,12 @@ def get_users(request):
 @login_required(login_url='/login')
 def claim_ticket(request, pk):
     ticket = Ticket.objects.get(id=pk)
-    ticket.assigned_user = request.user
+    # user_instance = Account.objects.filter(pk__in=users)
+    if request.user not in ticket.assigned_user.all():
+        ticket.assigned_user.add(request.user)
+
+    # ticket.assigned_user.add(request.user)
+    # ticket.assigned_user = request.user
     ticket.state = 1
     ticket.save()
     return redirect('/boards')

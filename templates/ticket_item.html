@@ -1,0 +1,48 @@
+<div id="{{ticket.id}}" class="card" draggable="true" ondragstart="dragStart(event)">
+    <div class="d-md-flex justify-content-between">
+        <div>
+            <h6 class="card-title">{{ticket.title}} </h6>
+            <p class="card-subtitle overme">{{ticket.description}} </p>
+            <h6 class=" card-title">Assigned To:</h6>
+            {% for user in ticket.assigned_user.all %}
+            <h6 class="card-title">{{user}}</h6>
+            {% endfor %}
+        </div>
+
+        <a>
+            <div style="background-color: {{ticket.priority.color}}" class="d-none d-sm-inline-block btn-sm shadow-sm ">
+                <span class="align-middle">{{ticket.priority}}</span>
+
+            </div>
+        </a>
+
+    </div>
+    <h6 class="card-title">Attachments </h6>
+    <div class="list-group my-3">
+        {% for attachment in attachments %}
+        {% if attachment.ticket.id == ticket.id %}
+        <a href="http://127.0.0.1:8000/static{{attachment.file.url}}"
+            class="list-group-item list-group-item-action">{{attachment.file}}</a>
+
+        {% endif %}
+        {% endfor %}
+
+    </div>
+    <div class="d-md-flex justify-content-between">
+        <a href="{% url 'claim_ticket' ticket.id %}">
+            <div class="d-none d-sm-inline-block btn-sm btn-success shadow-sm ">
+                <span class="align-middle">Claim</span>
+
+            </div>
+        </a>
+        {% if request.user.is_superuser %}
+        <a href="{% url 'update_ticket' ticket.id %}">
+            <div class="d-none d-sm-inline-block btn-sm btn-secondary shadow-sm ">
+                <span class="align-middle">Edit</span>
+
+            </div>
+        </a>
+        {% endif %}
+    </div>
+
+</div>

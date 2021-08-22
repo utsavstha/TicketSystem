@@ -14,10 +14,10 @@ var users_select = undefined
 const allBoards = JSON.parse(JSON.parse(document.getElementById('boards').textContent));
 const allGroups = JSON.parse(JSON.parse(document.getElementById('groups').textContent));
 const allAccounts = JSON.parse(JSON.parse(document.getElementById('accounts').textContent));
-if (ticket) {
-    selectedGroups = ticket.fields.assigned_group;
-    // selectedGroups.push(ticket.fields.groups.all)
-}
+// if (ticket) {
+//     selectedGroups = ticket.fields.assigned_group;
+//     // selectedGroups.push(ticket.fields.groups.all)
+// }
 filteredAccounts = allAccounts
 // Initialize function, create initial tokens with itens that are already selected by the user
 function init(element) {
@@ -488,6 +488,9 @@ function isEmpty(element) {
     return (!str || str.length === 0);
 }
 function onPostForm() {
+    // window.location.replace('127.0.0.1:8000/boards');
+    // let goback =
+
     const csrftoken = getCookie('csrftoken');
     const ticket_name = document.getElementById("ticket_name")
     const description = document.getElementById("description")
@@ -537,6 +540,7 @@ function onPostForm() {
         },
         body: data
     }).then(res => {
+        window.location.href = res.url;
         console.log("Request complete! response:", res);
     });
 }

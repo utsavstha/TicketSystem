@@ -8,6 +8,15 @@
         <div class="container-fluid p-0 px-lg-0 px-md-0">
             <!-- Topbar -->
             {% include 'topbar.html' %}
+
+            <form id="filter-form" action="" method="POST" hidden>
+                {% csrf_token %}
+                <input type="text" id="search_keyword" name="search_keyword" value="{{search_keyword}}">
+                <input type="text" id="selected_priority" name="selected_priority" value="{{selected_priority}}">
+                <button type="submit" class="btn btn-primary">Submit</button>
+
+            </form>
+
             <div class="col-md-12">
 
                 <div class="board-layout">
@@ -17,37 +26,41 @@
                             <!-- title -->
                             <div class="d-md-flex align-items-center">
                                 <div>
-                                    <form id="form-search" class="d-none d-sm-inline-block form-inline navbar-search"
-                                        method="POST">
-                                        {% csrf_token %}
-                                        <div class="input-group">
-                                            <input type="text" class="form-control bg-light "
-                                                placeholder="Search by Ticket Name" aria-label="Search" id="txt-search"
-                                                name="search" value="{{search_data}}">
-                                            <div class="input-group-append">
-                                                <button class="btn btn-primary" type="submit">
-                                                    <i class="fas fa-search fa-sm"></i>
-                                                </button>
-                                            </div>
+
+                                    <div class="input-group">
+                                        <input type="text" class="form-control bg-light "
+                                            placeholder="Search by Ticket Name" aria-label="Search" id="search_data"
+                                            name="search_data" value="{{search_keyword}}">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary" onclick="search()">
+                                                <i class="fas fa-search fa-sm"></i>
+                                            </button>
                                         </div>
-                                    </form>
+                                    </div>
+
                                 </div>
                                 <br />
 
                                 <div class="ml-auto">
+
+                                    {% csrf_token %}
                                     <div class="dl">
-                                        <select id="filter-select" class="custom-select">
+                                        <select id="priority_select" name="priority_select" class="custom-select"
+                                            onChange="filterPriority()">
+                                            <option value="-1" {% if selected_priority in '-1' %} selected {% endif %}>
+                                                None</option>
                                             {% for priority in priorities %}
+
                                             <option value="{{priority.id}}">{{priority.name}}</option>
+
                                             {% endfor %}
 
                                         </select>
 
                                     </div>
+
                                 </div>
                             </div>
-
-
 
                             <!-- title -->
                         </div>
@@ -106,125 +119,17 @@
                                         To Do
                                     </div>
 
-                                    {% for ticket in tickets %}
-                                    {% for ticket_board in ticket.board.all %}
-                                    {% if ticket_board.id == board.id and ticket.state == 0%}
-                                    <div id="{{ticket.id}}" class="card" draggable="true"
-                                        ondragstart="dragStart(event)">
-                                        <div class="d-md-flex justify-content-between">
-                                            <div>
-                                                <h6 class="card-title">{{ticket.title}} </h6>
-                                                <p class="card-subtitle overme">{{ticket.description}} </p>
-                                                <h6 class=" card-title">Assigned To:</h6>
-                                                {% for user in ticket.assigned_user.all %}
-                                                <h6 class="card-title">{{user}}</h6>
-                                                {% endfor %}
-                                            </div>
-
-                                            <a>
-                                                <div style="background-color: {{ticket.priority.color}}"
-                                                    class="d-none d-sm-inline-block btn-sm shadow-sm ">
-                                                    <span class="align-middle">{{ticket.priority}}</span>
-
-                                                </div>
-                                            </a>
-
-                                        </div>
-                                        <h6 class="card-title">Attachments </h6>
-                                        <div class="list-group my-3">
-                                            {% for attachment in attachments %}
-                                            {% if attachment.ticket.id == ticket.id %}
-                                            <a href="http://127.0.0.1:8000/static{{attachment.file.url}}"
-                                                class="list-group-item list-group-item-action">{{attachment.file}}</a>
-
-                                            {% endif %}
-                                            {% endfor %}
-
-                                        </div>
-                                        <div class="d-md-flex justify-content-between">
-                                            <a href="{% url 'claim_ticket' ticket.id %}">
-                                                <div class="d-none d-sm-inline-block btn-sm btn-success shadow-sm ">
-                                                    <span class="align-middle">Claim</span>
-
-                                                </div>
-                                            </a>
-                                            {% if request.user.is_superuser %}
-                                            <a href="{% url 'update_ticket' ticket.id %}">
-                                                <div class="d-none d-sm-inline-block btn-sm btn-secondary shadow-sm ">
-                                                    <span class="align-middle">Edit</span>
-
-                                                </div>
-                                            </a>
-                                            {% endif %}
-                                        </div>
-
-                                    </div>
-                                    {% endif %}
+                                    {% for ticket in todo %}
+                                    {% include 'ticket_item.html' %}
                                     {% endfor %}
-                                    {% endfor %}
-
-
 
                                 </div>
                                 <div id='list2' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
                                     <div class="list-title">
                                         In Progress
                                     </div>
-                                    {% for ticket in tickets %}
-                                    {% for ticket_board in ticket.board.all %}
-                                    {% if ticket_board.id == board.id and ticket.state == 1%}
-                                    <div id="{{ticket.id}}" class="card" draggable="true"
-                                        ondragstart="dragStart(event)">
-                                        <div class="d-md-flex justify-content-between">
-                                            <div>
-                                                <h6 class="card-title">{{ticket.title}} </h6>
-                                                <h6 class="card-title">Assigned To:</h6>
-                                                {% for user in ticket.assigned_user.all %}
-                                                <h6 class="card-title">{{user}}</h6>
-                                                {% endfor %}
-                                            </div>
-
-                                            <a>
-                                                <div style="background-color: {{ticket.priority.color}}"
-                                                    class="d-none d-sm-inline-block btn-sm shadow-sm ">
-                                                    <span class="align-middle">{{ticket.priority}}</span>
-
-                                                </div>
-                                            </a>
-
-
-                                        </div>
-                                        <h6 class="card-title">Attachments </h6>
-                                        <div class="list-group my-3">
-                                            {% for attachment in attachments %}
-                                            {% if attachment.ticket.id == ticket.id %}
-                                            <a href="http://127.0.0.1:8000/static{{attachment.file.url}}"
-                                                class="list-group-item list-group-item-action">{{attachment.file}}</a>
-
-                                            {% endif %}
-                                            {% endfor %}
-
-                                        </div>
-                                        <div class="d-md-flex justify-content-between">
-                                            <a href="{% url 'claim_ticket' ticket.id %}">
-                                                <div class="d-none d-sm-inline-block btn-sm btn-success shadow-sm ">
-                                                    <span class="align-middle">Claim</span>
-
-                                                </div>
-                                            </a>
-                                            {% if request.user.is_superuser %}
-                                            <a href="{% url 'update_ticket' ticket.id %}">
-                                                <div class="d-none d-sm-inline-block btn-sm btn-secondary shadow-sm ">
-                                                    <span class="align-middle">Edit</span>
-
-                                                </div>
-                                            </a>
-                                            {% endif %}
-                                        </div>
-
-                                    </div>
-                                    {% endif %}
-                                    {% endfor %}
+                                    {% for ticket in progress %}
+                                    {% include 'ticket_item.html' %}
                                     {% endfor %}
 
                                 </div>
@@ -233,58 +138,8 @@
                                     <div class="list-title">
                                         In Review
                                     </div>
-                                    {% for ticket in tickets %}
-                                    {% for ticket_board in ticket.board.all %}
-                                    {% if ticket_board.id == board.id and ticket.state == 2%}
-                                    <div id="{{ticket.id}}" class="card" draggable="true"
-                                        ondragstart="dragStart(event)">
-                                        <div class="d-md-flex justify-content-between">
-                                            <div>
-                                                <h6 class="card-title">{{ticket.title}} </h6>
-                                                <h6 class="card-title">Assigned To:</h6>
-                                                {% for user in ticket.assigned_user.all %}
-                                                <h6 class="card-title">{{user}}</h6>
-                                                {% endfor %}
-                                            </div>
-
-                                            <a>
-                                                <div style="background-color: {{ticket.priority.color}}"
-                                                    class="d-none d-sm-inline-block btn-sm shadow-sm ">
-                                                    <span class="align-middle">{{ticket.priority}}</span>
-
-                                                </div>
-                                            </a>
-                                        </div>
-                                        <h6 class="card-title">Attachments </h6>
-                                        <div class="list-group my-3">
-                                            {% for attachment in attachments %}
-                                            {% if attachment.ticket.id == ticket.id %}
-                                            <a href="http://127.0.0.1:8000/static{{attachment.file.url}}"
-                                                class="list-group-item list-group-item-action">{{attachment.file}}</a>
-
-                                            {% endif %}
-                                            {% endfor %}
-
-                                        </div>
-                                        <div class="d-md-flex justify-content-between">
-                                            <a href="{% url 'claim_ticket' ticket.id %}">
-                                                <div class="d-none d-sm-inline-block btn-sm btn-success shadow-sm ">
-                                                    <span class="align-middle">Claim</span>
-
-                                                </div>
-                                            </a>
-                                            {% if request.user.is_superuser %}
-                                            <a href="{% url 'update_ticket' ticket.id %}">
-                                                <div class="d-none d-sm-inline-block btn-sm btn-secondary shadow-sm ">
-                                                    <span class="align-middle">Edit</span>
-
-                                                </div>
-                                            </a>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                    {% endfor %}
+                                    {% for ticket in review %}
+                                    {% include 'ticket_item.html' %}
                                     {% endfor %}
 
                                 </div>
@@ -292,63 +147,8 @@
                                     <div class="list-title">
                                         Completed
                                     </div>
-                                    {% for ticket in tickets %}
-                                    {% for ticket_board in ticket.board.all %}
-                                    {% if ticket_board.id == board.id and ticket.state == 3%}
-                                    <div id="{{ticket.id}}" class="card" draggable="true"
-                                        ondragstart="dragStart(event)">
-
-                                        <div class="d-md-flex justify-content-between">
-                                            <div>
-                                                <h6 class="card-title">{{ticket.title}} </h6>
-
-                                                <h6 class="card-title">Assigned To:</h6>
-                                                {% for user in ticket.assigned_user.all %}
-                                                <h6 class="card-title">{{user}}</h6>
-                                                {% endfor %}
-
-                                            </div>
-
-                                            <a>
-                                                <div style="background-color: {{ticket.priority.color}}"
-                                                    class="d-none d-sm-inline-block btn-sm shadow-sm ">
-                                                    <span class="align-middle">{{ticket.priority}}</span>
-
-                                                </div>
-                                            </a>
-
-
-                                        </div>
-                                        <h6 class="card-title">Attachments </h6>
-                                        <div class="list-group my-3">
-                                            {% for attachment in attachments %}
-                                            {% if attachment.ticket.id == ticket.id %}
-                                            <a href="http://127.0.0.1:8000/static{{attachment.file.url}}"
-                                                class="list-group-item list-group-item-action">{{attachment.file}}</a>
-
-                                            {% endif %}
-                                            {% endfor %}
-
-                                        </div>
-                                        <div class="d-md-flex justify-content-between">
-                                            <a href="{% url 'claim_ticket' ticket.id %}">
-                                                <div class="d-none d-sm-inline-block btn-sm btn-success shadow-sm ">
-                                                    <span class="align-middle">Claim</span>
-
-                                                </div>
-                                            </a>
-                                            {% if request.user.is_superuser %}
-                                            <a href="{% url 'update_ticket' ticket.id %}">
-                                                <div class="d-none d-sm-inline-block btn-sm btn-secondary shadow-sm ">
-                                                    <span class="align-middle">Edit</span>
-
-                                                </div>
-                                            </a>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                    {% endfor %}
+                                    {% for ticket in completed %}
+                                    {% include 'ticket_item.html' %}
                                     {% endfor %}
 
                                 </div>
@@ -417,6 +217,32 @@
             }) // 5
             .catch(errors => console.log(errors));
     }
+
+    function search() {
+        let search_data = document.getElementById("search_data");
+        let search_keyword = document.getElementById("search_keyword");
+        search_keyword.value = search_data.value;
+
+        document.getElementById("filter-form").submit();
+    }
+
+    function filterPriority() {
+        let priority_select = document.getElementById("priority_select"); //value set from options
+        let selected_priority = document.getElementById("selected_priority"); //value set to filter form
+        selected_priority.value = priority_select.value;
+
+        document.getElementById("filter-form").submit();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        let selected_priority = document.getElementById("selected_priority"); //value set to filter form
+        let priority_select = document.getElementById("priority_select").options;
+        for (let i = 0; i < priority_select.length; i++) {
+            if (priority_select[i].value == selected_priority.value) {
+                priority_select.selectedIndex = i;
+            }
+        }
+    });
 </script>
 
 {% endblock %}

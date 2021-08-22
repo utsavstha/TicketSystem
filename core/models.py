@@ -74,6 +74,9 @@ class Priority(models.Model):
     def __str__(self):
         return self.name
 
+    def get_id(self):
+        return Int(self.id)
+
 
 class Classification(models.Model):
     name = models.CharField(max_length=200, null=True)
@@ -93,6 +96,24 @@ class Board(models.Model):
     def __str__(self):
         return self.title
 
+    def get_all():
+        all_boards = []
+        boards = Board.objects.all()
+        for i in range(len(boards)):
+            if i == 0:
+                all_boards.append({"title": "General", "id": '-1'})
+
+            all_boards.append(boards[i])
+        return all_boards
+
+    def filter_all(group):
+        all_boards = []
+        boards = Board.objects.filter(group__in=group)
+        all_boards.append({"title": "General", "id": '-1'})
+        for i in range(len(boards)):
+            all_boards.append(boards[i])
+        return all_boards
+
 
 class Ticket(models.Model):
     title = models.CharField(max_length=200, null=True)
@@ -106,6 +127,29 @@ class Ticket(models.Model):
         Classification, on_delete=models.CASCADE)
     can_staff_complete = models.BooleanField()
 
+    def searchTicket(group=None, search_keyword='', priority_id='-1', user=None):
+        tickets = []
+        if group != None:
+            if priority_id != '-1':
+                tickets = Ticket.objects.filter(
+                    assigned_group__in=group, title__contains=search_keyword,
+                    priority__pk=priority_id)
+            else:
+                tickets = Ticket.objects.filter(
+                    assigned_group__in=group, title__contains=search_keyword)
+        else:
+            if priority_id != '-1':
+                tickets = Ticket.objects.filter(
+                    title__contains=search_keyword, priority__pk=priority_id)
+            else:
+                if user != None:
+                    tickets = Ticket.objects.filter(
+                        assigned_user=user, title__contains=search_keyword)
+                else:
+                    tickets = Ticket.objects.filter(
+                        title__contains=search_keyword)
+        return tickets
+
     def get_state(self):
         state = "Todo"
         if self.state == 0:
@@ -117,6 +161,33 @@ class Ticket(models.Model):
         else:
             state = "Completed"
         return state
+
+    def get_tickets(tickets, selected_board):
+        todo = []
+        progress = []
+        review = []
+        completed = []
+        for ticket in tickets:
+            for ticket_board in ticket.board.all():
+                if selected_board == None:
+                    if ticket.state == 0:
+                        todo.append(ticket)
+                    elif ticket.state == 1:
+                        progress.append(ticket)
+                    elif ticket.state == 2:
+                        review.append(ticket)
+                    elif ticket.state == 3:
+                        completed.append(ticket)
+                elif ticket_board.id == selected_board.id:
+                    if ticket.state == 0:
+                        todo.append(ticket)
+                    elif ticket.state == 1:
+                        progress.append(ticket)
+                    elif ticket.state == 2:
+                        review.append(ticket)
+                    elif ticket.state == 3:
+                        completed.append(ticket)
+        return (todo, progress, review, completed)
 
     def __str__(self):
         return self.title
