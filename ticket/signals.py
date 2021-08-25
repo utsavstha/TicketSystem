@@ -31,8 +31,15 @@ def create_ticket(sender, instance, created, **kwargs):
                 \nAssigned Group: {instance.assigned_group}
 
                 '''
-        log = TicketLog(ticket_name=instance.title, ticket_id=instance.id, title="Ticket Created",
-                        updated_by=request.user, description=message)
+        logMessage = f'''Priority: {instance.priority}
+        State: {instance.get_state()}
+        Board: {instance.board}
+        Classification: {instance.classification}
+        Assigned User: {instance.assigned_user}
+        Assigned Group: {instance.assigned_group}
+        '''
+        log = TicketLog(ticket_name=instance.title, ticket_id=instance.id, title="Created",
+                        updated_by=request.user, description=logMessage)
         log.save()
 
         if settings[0].create:
@@ -73,8 +80,16 @@ def update_ticket(sender, instance, created, **kwargs):
                 \nAssigned Group: {instance.assigned_group}
 
                 '''
-        log = TicketLog(ticket_name=instance.title, ticket_id=instance.id, title="Ticket Updated",
-                        updated_by=request.user, description=message)
+
+        logMessage = f'''Priority: {instance.priority}
+        State: {instance.get_state()}
+        Board: {instance.board}
+        Classification: {instance.classification}
+        Assigned User: {instance.assigned_user}
+        Assigned Group: {instance.assigned_group}
+        '''
+        log = TicketLog(ticket_name=instance.title, ticket_id=instance.id, title="Updated",
+                        updated_by=request.user, description=logMessage)
         log.save()
 
         if settings[0].update:
@@ -117,8 +132,15 @@ def delete_ticket(sender, instance, **kwargs):
             \nAssigned Group: {instance.assigned_group}
 
             '''
+    logMessage = f'''Priority: {instance.priority}
+        State: {instance.get_state()}
+        Board: {instance.board}
+        Classification: {instance.classification}
+        Assigned User: {instance.assigned_user}
+        Assigned Group: {instance.assigned_group}
+        '''
     log = TicketLog(ticket_name=instance.title, ticket_id=instance.id, title="Ticket Deleted",
-                    updated_by=request.user, description=message)
+                    updated_by=request.user, description=logMessage)
     log.save()
 
     if settings[0].delete:

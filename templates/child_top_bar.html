@@ -1,9 +1,13 @@
+{% load static %}
 <nav class="navbar navbar-expand navbar-light my-navbar">
 
     <!-- Sidebar Toggle (Topbar) -->
     <div class="nav-icon1 my-3">
-        <a href="{{request.META.HTTP_REFERER}}" tabindex="-1">
+        <a onclick="window.history.back();" tabindex="-1">
             <i class="fas fa-arrow-left"></i></a>
     </div>
+
+    <img class="img-thumbnail" src="{% static '/images/Logo.png'%}" />
+
 
 </nav>

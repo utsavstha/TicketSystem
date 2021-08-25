@@ -316,16 +316,38 @@ header navbar design
     line-height: 1.4;
 }
 .overme {
-    width: 150px;
-    overflow:hidden; 
-    white-space:nowrap; 
+    overflow: hidden;
     text-overflow: ellipsis;
-    color: red;
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* number of lines to show */
+    -webkit-box-orient: vertical;
 }
 
 .navbar-expand .navbar-nav .dropdown-menu {
     position: absolute;
 }
+
+.nav-tabs .nav-item .nav-link {
+    background-color: #C9CCCD;
+    color: #FFF;
+  }
+  
+  .nav-tabs .nav-item .nav-link.active {
+    background-color: #4D5866;
+
+    color: #ffc400;
+  }
+  
+  .tab-content {
+    border: 1px solid #dee2e6;
+    border-top: transparent;
+    padding: 15px;
+  }
+  
+  .tab-content .tab-pane {
+    min-height: 200px;
+    height: auto;
+  }
 
 .navbar-nav .dropdown-menu {
     box-shadow: 0 0.1rem 0.2rem rgba(0, 0, 0, .05);

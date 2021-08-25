@@ -12,6 +12,14 @@ def email_settings(request):
     return render(request, 'email_setting/email_settings.html', context)
 
 
+def create_defaults():
+    models = ["Classifications", "Groups", "Priorities", "Ticket", "Users"]
+    for model in models:
+        setting = EmailSettings(model_name=model,
+                                create=False, update=False, delete=False)
+        setting.save()
+
+
 @login_required(login_url='/login')
 def create_email_settings(request):
     form = EmailSettingsForm()

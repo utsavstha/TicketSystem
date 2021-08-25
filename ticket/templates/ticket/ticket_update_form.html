@@ -99,7 +99,7 @@
                                     <div class="form-group mt-3">
                                         <label for="description">Description</label>
                                         <textarea class="form-control" id="description" name="description"
-                                            rows="3"></textarea>
+                                            rows="3">{{ticket.description}}"</textarea>
                                     </div>
                                 </form>
                                 <div class="list-group my-3">
@@ -136,8 +136,8 @@
 
                                 </div>
                                 {{ file_form | bootstrap }}
-                                <input class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm " type="submit"
-                                    value="SAVE">
+                                <input class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm "
+                                    onclick="onPostForm()" value="SAVE">
                             </form>
                         </div>
 

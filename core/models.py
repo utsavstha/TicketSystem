@@ -99,10 +99,9 @@ class Board(models.Model):
     def get_all():
         all_boards = []
         boards = Board.objects.all()
-        for i in range(len(boards)):
-            if i == 0:
-                all_boards.append({"title": "General", "id": '-1'})
+        all_boards.append({"title": "General", "id": '-1'})
 
+        for i in range(len(boards)):
             all_boards.append(boards[i])
         return all_boards
 
@@ -203,6 +202,16 @@ class TicketLog(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class TicketComment(models.Model):
+    comment = models.CharField(max_length=1000, null=True)
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(verbose_name="timestamp", auto_now=True)
+    posted_by = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
+
+    def __str__(self):
+        return self.comment
 
 
 class TicketAttachment(models.Model):

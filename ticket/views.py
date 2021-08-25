@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from core.models import Ticket, Group, TicketAttachment, TicketLog, Priority, Classification, Account, Board
+from core.models import Ticket, Group, TicketAttachment, TicketLog, Priority, Classification, Account, Board, TicketComment
 from .forms import TicketAttachmentForm
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -56,20 +56,7 @@ def create_ticket(request):
             ticket.assigned_user.set(user_instance)
 
         ticket.save()
-        # ticket, created = Ticket.objects.get_or_create(
-        #     title=ticket_name, description=description,
-        #     priority=priority_instance, assigned_group=groups, board=boards,
-        #     classification=classification_instance,
-        #     can_staff_complete=staff, assigned_user=users)
-        # if created:
-        #     for f in files:
-        #         file_instance = TicketAttachment(
-        #             file=f, ticket=ticket)
-        #         file_instance.save()
 
-        # if form.is_valid() and file_form.is_valid():
-        #     ticket_instance = form.save(commit=False)
-        #     ticket_instance.save()
         for f in files:
             file_instance = TicketAttachment(
                 file=f, ticket=ticket)
@@ -86,6 +73,114 @@ def create_ticket(request):
 
 
 @login_required(login_url='/login')
+def quick_attach(request, pk):
+    files = request.FILES.getlist('file')
+    ticket = Ticket.objects.get(id=pk)
+    for f in files:
+        file_instance = TicketAttachment(
+            file=f, ticket=ticket)
+        file_instance.save()
+    return redirect('/boards')
+
+
+@login_required(login_url='/login')
+def ticket_info(request, pk):
+    ticket = Ticket.objects.get(id=pk)
+    logs = TicketLog.objects.filter(ticket_id=pk)
+    attachments = TicketAttachment.objects.filter(ticket=ticket)
+    comments = TicketComment.objects.filter(ticket=ticket)
+    file_form = TicketAttachmentForm()
+
+    context = {'ticket': ticket,
+               'logs': logs,
+               'comments': comments,
+               'file_form': file_form,
+               'attachments': attachments}
+    return render(request, 'ticket/ticket_info.html', context)
+
+
+@login_required(login_url='/login')
+def post_comment(request, pk):
+    ticket = Ticket.objects.get(id=pk)
+    content = request.POST.get('content')
+    comment = TicketComment(
+        comment=content, ticket=ticket, posted_by=request.user)
+    comment.save()
+    return redirect('ticket_info', pk=pk)
+
+
+@login_required(login_url='/login')
+def update_ticket(request, pk):
+    ticket = Ticket.objects.get(id=pk)
+
+    priorities = Priority.objects.all()
+    classifications = Classification.objects.all()
+    groups = Group.objects.all()
+    accounts = Account.objects.all()
+    boards = Board.objects.all()
+    ticketAttachments = TicketAttachment.objects.filter(ticket=ticket)
+
+    file_form = TicketAttachmentForm()
+
+    if request.method == 'POST':
+        ticket_name = request.POST.get('ticket_name')
+        description = request.POST.get('description')
+        priority = request.POST.get('priority')
+        groups = request.POST.get('groups')
+        boards = request.POST.get('boards')
+        classification = request.POST.get('classification')
+        staff_complete = request.POST.get('staff_complete')
+        users = request.POST.get('users')
+        files = [request.FILES.get('files[%d]' % i)
+                 for i in range(0, len(request.FILES))]
+        staff = True if staff_complete == 'true' else False
+        groups = groups.split(",") if "," in groups else groups
+        boards = boards.split(",") if "," in boards else boards
+        users = users.split(",") if "," in users else users
+
+        classification_instance = Classification.objects.filter(
+            name=classification).first()
+
+        priority_instance = Priority.objects.filter(name=priority).first()
+        ticket = Ticket.objects.get(id=pk)
+        ticket.title = ticket_name
+        ticket.description = description
+        ticket.priority = priority_instance
+        ticket.classification = classification_instance
+        ticket.can_staff_complete = staff
+        # ticket = Ticket(title=ticket_name, description=description,
+        #                 priority=priority_instance, classification=classification_instance,
+        #                 can_staff_complete=staff)
+        ticket.save()
+        group_instance = Group.objects.filter(pk__in=groups)
+        board_instance = Board.objects.filter(pk__in=boards)
+        ticket.assigned_group.set(group_instance)
+        ticket.board.set(board_instance)
+
+        if len(users) > 0:
+            user_instance = Account.objects.filter(pk__in=users)
+            ticket.assigned_user.set(user_instance)
+
+        ticket.save()
+
+        for f in files:
+            file_instance = TicketAttachment(
+                file=f, ticket=ticket)
+            file_instance.save()
+        return redirect('/boards')
+
+    context = {'activate_tickets': 'active',
+               'priorities': priorities, 'classifications': classifications,
+               'groups': groups,
+               'ticket_serialized': serializers.serialize('json', [ticket, ]),
+               'boards': boards, 'groups_serialized': serializers.serialize('json', groups),
+               'boards_serialized': serializers.serialize('json', boards),
+               'accounts_serialized': serializers.serialize('json', accounts),
+               'accounts': accounts, 'file_form': file_form, 'ticket': ticket, 'attachments': ticketAttachments}
+    return render(request, 'ticket/ticket_update_form.html', context)
+
+
+'''
 def update_ticket(request, pk):
 
     priorities = Priority.objects.all()
@@ -121,6 +216,8 @@ def update_ticket(request, pk):
                'accounts': accounts, 'file_form': file_form, 'ticket': ticket, 'attachments': ticketAttachments}
 
     return render(request, 'ticket/ticket_update_form.html', context)
+
+'''
 
 
 @login_required(login_url='/login')
@@ -162,7 +259,6 @@ def has_privilages(user, ticketId, state):
 @login_required(login_url='/login')
 def view_logs(request, pk):
     logs = TicketLog.objects.filter(ticket_id=pk)
-    print
     context = {'logs': logs}
     return render(request, 'ticket/ticket_log.html', context)
 
@@ -170,8 +266,7 @@ def view_logs(request, pk):
 @login_required(login_url='/login')
 def delete_ticket(request, pk):
     ticket = Ticket.objects.get(id=pk)
-    ticket.is_deleted = False
-    ticket.save()
+    ticket.delete()
 
     return redirect('/tickets')
 

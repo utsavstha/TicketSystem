@@ -11,10 +11,11 @@ from django.contrib.auth.decorators import login_required
 class UserForm(UserCreationForm):
     class Meta:
         model = Account
-        fields = ['first_name', 'last_name',
-                  'email', 'password1', 'password2', 'is_superuser', 'is_admin', 'is_staff']
+        fields = ['email', 'first_name', 'last_name', 'password1',
+                  'password2', 'is_superuser', 'is_admin', 'is_staff']
         labels = {
-            "is_superuser": "Admin"
+            "is_superuser": "Admin",
+            "is_staff": "Staff",
         }
 
 

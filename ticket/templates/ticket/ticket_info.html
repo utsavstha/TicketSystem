@@ -1,0 +1,143 @@
+{% extends 'main.html' %}
+{% block content %}
+{% include 'nav.html' %}
+
+<div id="page-content-wrapper">
+    <div id="content">
+        <div class="container-fluid p-0 px-lg-0 px-md-0">
+            <!-- Topbar -->
+            {% include 'child_top_bar.html' %}
+            <div class="col-md-12 mt-4">
+                <div id="{{ticket.id}}" class="card " draggable="true" ondragstart="dragStart(event)">
+                    <div class="d-md-flex justify-content-between">
+                        <div>
+                            <!-- <a href="{% url 'ticket_info' ticket.id %}" class="stretched-link">
+                            </a> -->
+                            <h6 class="card-title">{{ticket.title}} </h6>
+
+                            <p class="card-subtitle mt-4">{{ticket.description}} </p>
+                            {% if ticket.assigned_user.all > 0 %}
+                            <h6 class=" card-title mt-4">Assigned To:</h6>
+                            {% for user in ticket.assigned_user.all %}
+                            <h6 class="card-title">{{user}}</h6>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="d-md-flex justify-content-between">
+                            <a>
+                                <div style="background-color: {{ticket.priority.color}}"
+                                    class="d-none d-sm-inline-block btn-sm shadow-sm mr-3">
+                                    <span class="align-middle">{{ticket.priority}}</span>
+
+                                </div>
+                            </a>
+
+                            <a>
+                                <div class="d-none d-sm-inline-block btn-sm btn-secondary shadow-sm mr-3">
+                                    <span class="align-middle">{{ticket.classification}}</span>
+
+                                </div>
+                            </a>
+
+                            <a href="{% url 'claim_ticket' ticket.id %}">
+                                <div class="d-none d-sm-inline-block btn-sm btn-success shadow-sm ">
+                                    <span class="align-middle">Claim</span>
+
+                                </div>
+                            </a>
+                        </div>
+
+
+                    </div>
+                    {% if attachments > 0 %}
+                    <h6 class="card-title mt-4">Attachments </h6>
+                    <div class="list-group my-3">
+                        {% for attachment in attachments %}
+                        {% if attachment.ticket.id == ticket.id %}
+                        <a href="http://127.0.0.1:8000/static{{attachment.file.url}}"
+                            class="list-group-item list-group-item-action">{{attachment.file}}</a>
+
+                        {% endif %}
+                        {% endfor %}
+
+                    </div>
+                    {% endif %}
+
+
+
+                </div>
+                <ul class="nav nav-tabs mt-4" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-toggle="tab" href="#tabs-1" role="tab">Log</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#tabs-2" role="tab">Comments</a>
+                    </li>
+                </ul><!-- Tab panes -->
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tabs-1" role="tabpanel">
+                        <div class="list-group">
+                            {% for log in logs %}
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <p><b>{{log.updated_by}}</b> has {{log.title}} the ticket.</p>
+                                    <small>{{log.timestamp}}</small>
+                                </div>
+                                <div>
+                                    <span class="mb-1">{{log.description|linebreaks}}</span>
+                                </div>
+
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="tabs-2" role="tabpanel">
+                        <div>
+                            <div class="row height d-flex justify-content-center align-items-center">
+                                <div class="col">
+                                    <form action="{% url 'post_comment' ticket.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <div class="d-flex flex-row align-items-center p-3 form-color">
+                                            <img src="https://www.gravatar.com/avatar/{{imagehash}}?d=identicon"
+                                                width="50" class="rounded-circle mr-2">
+                                            <input type="text" class="form-control mr-2" name="content"
+                                                placeholder="Enter your comment...">
+                                            <button type="submit" class=" btn btn-primary">
+                                                COMMENT</button>
+
+                                        </div>
+                                    </form>
+
+                                    {% for comment in comments %}
+                                    <div class="mt-2">
+                                        <div class="d-flex flex-row p-3"> <img
+                                                src="https://www.gravatar.com/avatar/{{comment.get_hash}}?d=identicon"
+                                                width="40" height="40" class="rounded-circle mr-3">
+                                            <div class="w-100">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="d-flex flex-row align-items-center"> <span
+                                                            class="mr-2">{{comment.posted_by.email}}</span> </div>
+                                                    <small>{{comment.timestamp}}</small>
+                                                </div>
+                                                <p class="text-justify comment-text mb-0">{{comment.comment}}</p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+{% endblock %}

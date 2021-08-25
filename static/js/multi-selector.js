@@ -14,10 +14,14 @@ var users_select = undefined
 const allBoards = JSON.parse(JSON.parse(document.getElementById('boards').textContent));
 const allGroups = JSON.parse(JSON.parse(document.getElementById('groups').textContent));
 const allAccounts = JSON.parse(JSON.parse(document.getElementById('accounts').textContent));
-// if (ticket) {
-//     selectedGroups = ticket.fields.assigned_group;
-//     // selectedGroups.push(ticket.fields.groups.all)
-// }
+if (ticket) {
+    document.getElementById("staff_complete").checked = ticket.fields.can_staff_complete;
+    selectedGroups = ticket.fields.assigned_group;
+    selectedBoards = ticket.fields.board;
+    selectedAccounts = ticket.fields.assigned_user;
+    // console.log(selectedBoards);
+    // selectedGroups.push(ticket.fields.groups.all)
+}
 filteredAccounts = allAccounts
 // Initialize function, create initial tokens with itens that are already selected by the user
 function init(element) {
@@ -88,10 +92,8 @@ function createInitialTokens(select) {
         options_selected
     } = getOptions(select);
     const wrapper = select.parentNode;
-
     for (let i = 0; i < options_selected.length; i++) {
-        console.log("selected", options_selected[i]);
-        createToken(wrapper, options_selected[i]);
+        createToken(wrapper, options_selected[i], select.id);
     }
 
 
@@ -147,21 +149,51 @@ function openOptions(e) {
 }
 
 // Function that create a token inside of a wrapper with the given value
-function createToken(wrapper, target) {
+function createToken(wrapper, target, parent = "none") {
     const search = wrapper.querySelector(".search-container");
     // Create token wrapper
     const token = document.createElement("div");
     token.classList.add("selected-wrapper");
     const token_span = document.createElement("span");
     token_span.classList.add("selected-label");
+    var id = 0;
+    if (target.dataset == undefined) {
+        if (parent == "group") {
+            for (let i = 0; i < allGroups.length; i++) {
+                if (allGroups[i].pk == target) {
+                    token_span.innerText = allGroups[i].fields.name;
+                    id = allGroups[i].pk
+                }
+            }
+        } else if (parent == "boards") {
+            for (let i = 0; i < allBoards.length; i++) {
 
-    token_span.innerText = target.dataset.value;
+                if (allBoards[i].pk == target) {
+                    token_span.innerText = allBoards[i].fields.title;
+                    id = allBoards[i].pk
+                }
+            }
+        } else if (parent == "assigned-users") {
+            for (let i = 0; i < allAccounts.length; i++) {
+
+                if (allAccounts[i].pk == target) {
+                    token_span.innerText = allAccounts[i].fields.email;
+                    id = allAccounts[i].pk
+                }
+            }
+        }
+
+    } else {
+        token_span.innerText = target.dataset.value;
+        id = target.id;
+    }
+
 
     const close = document.createElement("a");
     close.classList.add("selected-close");
     close.setAttribute("tabindex", "-1");
     close.setAttribute("data-option", target.id);
-    close.setAttribute("id", target.id);
+    close.setAttribute("id", id);
     close.setAttribute("data-hits", 0);
     close.setAttribute("href", "#");
     close.innerText = "x";
@@ -218,8 +250,8 @@ function populateAutocompleteList(select, query, dropdown = false) {
     const {
         autocomplete_options
     } = getOptions(select);
-
-    // console.log(autocomplete_options);
+    console.log("options");
+    console.log(autocomplete_options);
     let options_to_show;
     if (dropdown)
         options_to_show = autocomplete_options;
@@ -354,7 +386,10 @@ function getOptions(select) {
     //     select.querySelectorAll("option:checked")
     // ).map(el => [el.value, el.id]);
     const autocomplete_options = [];
-
+    // console.log("all options");
+    // console.log(all_options);
+    // console.log("all selected");
+    // console.log(options_selected);
     all_options.forEach(option => {
         if (!doesInclude(options_selected, option)) {
             autocomplete_options.push(option);
@@ -398,12 +433,19 @@ function removeToken(e) {
     const option_to_unselect = wrapper.querySelector(`select option[value="${value_to_remove}"]`);
     // option_to_unselect.removeAttribute("selected");
     // Remove token attribute
+
     if (select.id == "group") {
+
         var updatedFilteredBoards = []
+        console.log(selectedGroups);
+        console.log(e.target);
 
         for (let i = 0; i < selectedGroups.length; i++) {
             if (selectedGroups[i] == e.target.id) {
-                selectedGroups.splice(i, 1)
+                console.log("delete");
+
+                // selectedGroups.splice(i, 1)
+                delete selectedGroups[i];
                 // updatedSelectedGroups.push(e.target.id)
             }
         }
@@ -415,7 +457,6 @@ function removeToken(e) {
             }
         }
         filteredBoards = updatedFilteredBoards
-
         populateAutocompleteList(boards_select, "", true)
     } else if (select.id == "boards") {
         for (let i = 0; i < selectedBoards.length; i++) {
