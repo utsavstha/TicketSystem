@@ -72,6 +72,68 @@
                                     <h5 class="card-subtitle">List of all available Boards</h5>
                                 </div>
 
+
+                            </div>
+
+                            <div class="d-md-flex align-items-center mt-100">
+                                <div class="left">
+                                    <div class="board-text">General</div>
+                                </div>
+                                <div class="ml-auto">
+                                    <div class="dl">
+                                        {% if request.user.is_superuser or request.user.is_admin %}
+
+                                        <a href="{% url 'create_ticket' %}"
+                                            class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+                                            Add New Ticket<i class="fas fa-plus-circle mx-2"></i></a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- General Board -->
+                            <div class="board-lists" style="height: 400px; overflow-y: scroll;">
+                                <div id='list1' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
+                                    <div class="list-title">
+                                        To Do
+                                    </div>
+                                    {% for ticket in todo_general %}
+                                    {% include 'ticket_item_general_board.html' %}
+                                    {% endfor %}
+
+                                </div>
+                                <div id='list2' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
+                                    <div class="list-title">
+                                        In Progress
+                                    </div>
+                                    {% for ticket in progress_general %}
+                                    {% include 'ticket_item_general_board.html' %}
+                                    {% endfor %}
+
+                                </div>
+
+                                <div id='list3' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
+                                    <div class="list-title">
+                                        In Review
+                                    </div>
+                                    {% for ticket in review_general %}
+                                    {% include 'ticket_item_general_board.html' %}
+                                    {% endfor %}
+
+                                </div>
+                                <div id='list4' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
+                                    <div class="list-title">
+                                        Completed
+                                    </div>
+                                    {% for ticket in completed_general %}
+                                    {% include 'ticket_item_general_board.html' %}
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                            <div class="d-md-flex align-items-center mt-100">
+                                <div class="left">
+                                    <div class="board-text">{{board.title}}</div>
+                                </div>
                                 <div class="ml-auto">
                                     <div class="d-flex justify-content-end">
                                         <div class="btn-group">
@@ -94,27 +156,9 @@
 
                                 </div>
                             </div>
-
-
-
-                            <div class="d-md-flex align-items-center mt-100">
-                                <div class="left">
-                                    <div class="board-text">{{board.title}}</div>
-                                </div>
-                                <div class="ml-auto">
-                                    <div class="dl">
-                                        {% if request.user.is_superuser or request.user.is_admin %}
-
-                                        <a href="{% url 'create_ticket' %}"
-                                            class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
-                                            Add New Ticket<i class="fas fa-plus-circle mx-2"></i></a>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="board-lists">
-
-                                <div id='list1' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
+                            <!-- Selected board -->
+                            <div class="board-lists" style="height: 400px; overflow-y: scroll;">
+                                <div id='list5' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
                                     <div class="list-title">
                                         To Do
                                     </div>
@@ -123,7 +167,7 @@
                                     {% endfor %}
 
                                 </div>
-                                <div id='list2' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
+                                <div id='list6' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
                                     <div class="list-title">
                                         In Progress
                                     </div>
@@ -133,7 +177,7 @@
 
                                 </div>
 
-                                <div id='list3' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
+                                <div id='list7' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
                                     <div class="list-title">
                                         In Review
                                     </div>
@@ -142,7 +186,7 @@
                                     {% endfor %}
 
                                 </div>
-                                <div id='list4' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
+                                <div id='list8' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
                                     <div class="list-title">
                                         Completed
                                     </div>
@@ -152,6 +196,7 @@
 
                                 </div>
                             </div>
+
 
                         </div>
 

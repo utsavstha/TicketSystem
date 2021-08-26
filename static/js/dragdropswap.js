@@ -23,6 +23,9 @@ function dropIt(ev) {
     let targetEl = document.getElementById(findUpTag(ev.target).id);
     let targetParentEl = targetEl.parentElement;
 
+    console.log(sourceIdEl.id);
+    console.log(targetId);
+
     // Compare List names to see if we are going between lists
     // or within the same list
     if (targetParentEl.id !== sourceIdParentEl.id) {
@@ -37,19 +40,25 @@ function dropIt(ev) {
             targetParentEl.appendChild(sourceIdEl);
 
         } else {
-            if (ev.target.id === 'list1') {
+            console.log("target", ev.target);
+
+            if (targetId === 'list1') {
                 changeState(ticketId, 0, targetId, sourceId, appendToDestination);
-            } else if (ev.target.id === 'list2') {
+            } else if (targetId === 'list2') {
                 changeState(ticketId, 1, targetId, sourceId, appendToDestination);
-            } else if (ev.target.id === 'list3') {
+            } else if (targetId === 'list3') {
+                changeState(ticketId, 2, targetId, sourceId, appendToDestination);
+            } else if (targetId === 'list4') {
+                changeState(ticketId, 3, targetId, sourceId, appendToDestination);
+            } else if (targetId === 'list5') {
+                changeState(ticketId, 0, targetId, sourceId, appendToDestination);
+            } else if (targetId === 'list6') {
+                changeState(ticketId, 1, targetId, sourceId, appendToDestination);
+            } else if (targetId === 'list7') {
                 changeState(ticketId, 2, targetId, sourceId, appendToDestination);
             } else {
                 changeState(ticketId, 3, targetId, sourceId, appendToDestination);
             }
-            // changeState(ticketId, "test");
-            // Append to the list
-            // targetEl.appendChild(sourceIdEl);
-
 
         }
 
@@ -69,26 +78,27 @@ function dropIt(ev) {
         holderText = '';
     }
 
-    function appendToDestination(target, source) {
-        let sourceIdEl = document.getElementById(source);
-        // ev.target.id here is the id of target Object of the drop
-        console.log("target id");
-        console.log(target);
-        let targetEl = document.getElementById(target)
-        targetEl.appendChild(sourceIdEl);
-    }
-
+}
+function appendToDestination(target, source) {
+    let sourceIdEl = document.getElementById(source);
+    // ev.target.id here is the id of target Object of the drop
+    let targetEl = document.getElementById(target)
+    targetEl.appendChild(sourceIdEl);
 }
 
 function findUpTag(el) {
-    if (el.id == "list1" || el.id == "list2" || el.id == "list3" || el.id == "list4") {
+    if (el.id == "list1" || el.id == "list2" || el.id == "list3" || el.id == "list4" || el.id == "list5" || el.id == "list6" || el.id == "list7" || el.id == "list8") {
         return el;
     }
     while (el.parentNode) {
         el = el.parentNode;
-        if (el.id == "list1" || el.id == "list2" || el.id == "list3" || el.id == "list4")
+
+        if (el.id == "list1" || el.id == "list2" || el.id == "list3" || el.id == "list4" || el.id == "list5" || el.id == "list6" || el.id == "list7" || el.id == "list8") {
             return el;
+
+        }
     }
+    console.log("not found");
     return null;
 }
 

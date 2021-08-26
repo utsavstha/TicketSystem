@@ -161,6 +161,23 @@ class Ticket(models.Model):
             state = "Completed"
         return state
 
+    def get_all_assigned_tickets(tickets):
+        todo = []
+        progress = []
+        review = []
+        completed = []
+        for ticket in tickets:
+            if ticket.state == 0:
+                todo.append(ticket)
+            elif ticket.state == 1:
+                progress.append(ticket)
+            elif ticket.state == 2:
+                review.append(ticket)
+            elif ticket.state == 3:
+                completed.append(ticket)
+
+        return (todo, progress, review, completed)
+
     def get_tickets(tickets, selected_board):
         todo = []
         progress = []
@@ -178,6 +195,7 @@ class Ticket(models.Model):
                     elif ticket.state == 3:
                         completed.append(ticket)
                 elif ticket_board.id == selected_board.id:
+                    print(ticket.state)
                     if ticket.state == 0:
                         todo.append(ticket)
                     elif ticket.state == 1:

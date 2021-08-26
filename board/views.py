@@ -19,14 +19,15 @@ def boards(request, pk='-1'):
     search_keyword = ''
     priority = '-1'
 
+    generalTickets = None
+
     if request.method == 'POST':
-        print(request.POST)
         keyword = request.POST.get('search_keyword')
         search_keyword = '' if keyword == None else keyword
         priority = request.POST.get('selected_priority')
 
     if current_user.is_superuser or current_user.is_admin:
-        boards = Board.get_all()
+        boards = Board.objects.all()
         tickets = Ticket.searchTicket(
             search_keyword=search_keyword, priority_id=priority)
 
@@ -36,7 +37,7 @@ def boards(request, pk='-1'):
             selected_board = None
     else:
         group = Group.objects.filter(users=current_user)
-        boards = Board.filter_all(group=group)
+        boards = Board.objects.filter(group=group)
         if pk != '-1':
             tickets = Ticket.searchTicket(group=group,
                                           search_keyword=search_keyword, priority_id=priority)
@@ -49,9 +50,13 @@ def boards(request, pk='-1'):
     (todo, progress, review, completed) = Ticket.get_tickets(
         tickets=tickets, selected_board=selected_board)
 
+    (todo_general, progress_general, review_general, completed_general) = Ticket.get_all_assigned_tickets(
+        tickets=tickets)
+
     context = {'activate_board': 'active',
-               "boards": boards, 'todo': todo, 'progress': progress, 'review': review,
-               'completed': completed,
+               "boards": boards,
+               'todo': todo, 'progress': progress, 'review': review, 'completed': completed,
+               'todo_general': todo_general, 'progress_general': progress_general, 'review_general': review_general, 'completed_general': completed_general,
                'selected_priority': priority,
                'priorities': priorities,
                'search_keyword': search_keyword,

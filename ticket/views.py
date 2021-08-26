@@ -227,10 +227,14 @@ def change_state(request):
     if request.method == 'POST':
         state = request.POST.get('state')
         id = request.POST.get('id')
+        if "-" in id:
+            id = id.split("-")[1]
         ticket = Ticket.objects.get(id=id)
+        print("before", ticket.state)
         if has_privilages(current_user, id, state) or ticket.can_staff_complete:
             ticket.state = state
             ticket.save()
+            print("after", state)
             return JsonResponse({"status": True})
         else:
             return JsonResponse({"status": False})
