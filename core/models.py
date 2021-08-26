@@ -70,6 +70,7 @@ class Group(models.Model):
 class Priority(models.Model):
     name = models.CharField(max_length=200, null=True)
     color = models.CharField(max_length=10, null=True)
+    priority_value = models.IntegerField()
 
     def __str__(self):
         return self.name

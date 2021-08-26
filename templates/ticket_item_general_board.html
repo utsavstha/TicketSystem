@@ -1,4 +1,5 @@
-<div id="general-{{ticket.id}}" class="card " draggable="true" ondragstart="dragStart(event)">
+<div id="general-{{ticket.id}}" class="card " draggable="true" data-value="{{ticket.priority.priority_value}}"
+    ondragstart="dragStart(event)">
     <div class="d-md-flex justify-content-between">
         <div>
             <!-- <a href="{% url 'ticket_info' ticket.id %}" class="stretched-link">

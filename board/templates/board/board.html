@@ -2,7 +2,7 @@
 {% block content %}
 {% include 'nav.html' %}
 {% load bootstrap %}
-
+{% load static %}
 <div id="page-content-wrapper">
     <div id="content">
         <div class="container-fluid p-0 px-lg-0 px-md-0">
@@ -94,7 +94,19 @@
                             <div class="board-lists" style="height: 400px; overflow-y: scroll;">
                                 <div id='list1' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
                                     <div class="list-title">
-                                        To Do
+                                        <div class="d-flex justify-content-between">
+                                            <span>To Do</span>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="up-arrow">
+                                                    ▲
+                                                </span>
+                                                <span class="down-arrow">
+                                                    ▼
+                                                </span>
+                                            </div>
+
+
+                                        </div>
                                     </div>
                                     {% for ticket in todo_general %}
                                     {% include 'ticket_item_general_board.html' %}
@@ -103,7 +115,19 @@
                                 </div>
                                 <div id='list2' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
                                     <div class="list-title">
-                                        In Progress
+                                        <div class="d-flex justify-content-between">
+                                            <span>In Progress</span>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="up-arrow">
+                                                    ▲
+                                                </span>
+                                                <span class="down-arrow">
+                                                    ▼
+                                                </span>
+                                            </div>
+
+
+                                        </div>
                                     </div>
                                     {% for ticket in progress_general %}
                                     {% include 'ticket_item_general_board.html' %}
@@ -113,7 +137,19 @@
 
                                 <div id='list3' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
                                     <div class="list-title">
-                                        In Review
+                                        <div class="d-flex justify-content-between">
+                                            <span>In Review</span>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="up-arrow">
+                                                    ▲
+                                                </span>
+                                                <span class="down-arrow">
+                                                    ▼
+                                                </span>
+                                            </div>
+
+
+                                        </div>
                                     </div>
                                     {% for ticket in review_general %}
                                     {% include 'ticket_item_general_board.html' %}
@@ -122,7 +158,19 @@
                                 </div>
                                 <div id='list4' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
                                     <div class="list-title">
-                                        Completed
+                                        <div class="d-flex justify-content-between">
+                                            <span>Completed</span>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="up-arrow">
+                                                    ▲
+                                                </span>
+                                                <span class="down-arrow">
+                                                    ▼
+                                                </span>
+                                            </div>
+
+
+                                        </div>
                                     </div>
                                     {% for ticket in completed_general %}
                                     {% include 'ticket_item_general_board.html' %}
@@ -160,7 +208,19 @@
                             <div class="board-lists" style="height: 400px; overflow-y: scroll;">
                                 <div id='list5' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
                                     <div class="list-title">
-                                        To Do
+                                        <div class="d-flex justify-content-between">
+                                            <span>To Do</span>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="up-arrow">
+                                                    ▲
+                                                </span>
+                                                <span class="down-arrow">
+                                                    ▼
+                                                </span>
+                                            </div>
+
+
+                                        </div>
                                     </div>
                                     {% for ticket in todo %}
                                     {% include 'ticket_item.html' %}
@@ -169,7 +229,19 @@
                                 </div>
                                 <div id='list6' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
                                     <div class="list-title">
-                                        In Progress
+                                        <div class="d-flex justify-content-between">
+                                            <span>In Progress</span>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="up-arrow">
+                                                    ▲
+                                                </span>
+                                                <span class="down-arrow">
+                                                    ▼
+                                                </span>
+                                            </div>
+
+
+                                        </div>
                                     </div>
                                     {% for ticket in progress %}
                                     {% include 'ticket_item.html' %}
@@ -179,7 +251,19 @@
 
                                 <div id='list7' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
                                     <div class="list-title">
-                                        In Review
+                                        <div class="d-flex justify-content-between">
+                                            <span>In Review</span>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="up-arrow">
+                                                    ▲
+                                                </span>
+                                                <span class="down-arrow">
+                                                    ▼
+                                                </span>
+                                            </div>
+
+
+                                        </div>
                                     </div>
                                     {% for ticket in review %}
                                     {% include 'ticket_item.html' %}
@@ -188,7 +272,19 @@
                                 </div>
                                 <div id='list8' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
                                     <div class="list-title">
-                                        Completed
+                                        <div class="d-flex justify-content-between">
+                                            <span>Completed</span>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="up-arrow">
+                                                    ▲
+                                                </span>
+                                                <span class="down-arrow">
+                                                    ▼
+                                                </span>
+                                            </div>
+
+
+                                        </div>
                                     </div>
                                     {% for ticket in completed %}
                                     {% include 'ticket_item.html' %}
@@ -235,6 +331,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="{% static '/js/sortDivs.js'%}"></script>
 
 <script>
     function showModal(id) {
