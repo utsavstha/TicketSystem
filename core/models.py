@@ -185,7 +185,10 @@ class Ticket(models.Model):
     state = models.IntegerField(default=0)
     board = models.ManyToManyField(Board)
     assigned_group = models.ManyToManyField(Group)
-    assigned_user = models.ManyToManyField(Account)
+    assigned_user = models.ManyToManyField(
+        related_name='assigned_user', to=Account)
+    ticket_supervisors = models.ManyToManyField(
+        related_name='ticket_supervisors', to=Account)
     classification = models.ForeignKey(
         Classification, on_delete=models.CASCADE)
     can_staff_complete = models.BooleanField()
