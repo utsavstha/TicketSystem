@@ -4,6 +4,10 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', views.boards, name="boards"),
+    path('manage_board', views.manage_board, name="manage_board"),
+    path('update_board/<str:pk>', views.update_board, name="update_board"),
+    path('delete_board/<str:pk>', views.delete_board, name="delete_board"),
+    
     path('boards/', views.boards, name="boards"),
     path('boards/<str:pk>', views.boards, name="boards"),
     # path('get_board/<str:pk>', views.get_board, name="get_board"),

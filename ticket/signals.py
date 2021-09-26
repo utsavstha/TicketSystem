@@ -20,23 +20,23 @@ def create_ticket(sender, instance, created, **kwargs):
                 break
         else:
             request = None
-        message = f'''A new ticket has been created for {instance.assigned_group}
+        message = f'''A new ticket has been created for {instance.get_assigned_group()}
                 \nTitle: {instance.title}
                 \nDescription: {instance.description}
                 \nPriority: {instance.priority}
                 \nState: {instance.get_state()}
-                \nBoard: {instance.board}
+                \nBoard: {instance.get_board()}
                 \nClassification: {instance.classification}
-                \nAssigned User: {instance.assigned_user}
-                \nAssigned Group: {instance.assigned_group}
+                \nAssigned User: {instance.get_assigned_users()}
+                \nAssigned Group: {instance.get_assigned_group()}
 
                 '''
         logMessage = f'''Priority: {instance.priority}
         State: {instance.get_state()}
-        Board: {instance.board}
+        Board: {instance.get_board()}
         Classification: {instance.classification}
-        Assigned User: {instance.assigned_user}
-        Assigned Group: {instance.assigned_group}
+        Assigned User: {instance.get_assigned_users()}
+        Assigned Group: {instance.get_assigned_group()}
         '''
         log = TicketLog(ticket_name=instance.title, ticket_id=instance.id, title="Created",
                         updated_by=request.user, description=logMessage)
@@ -48,7 +48,9 @@ def create_ticket(sender, instance, created, **kwargs):
             users = []
             admin_and_managers = Account.objects.filter(
                 is_superuser=True, is_admin=True).values_list('email', flat=True)
-            group_members = instance.assigned_group.users.all().values_list('email', flat=True)
+            group_members = []
+            if hasattr(instance, 'assigned_groups'):
+                group_members = instance.assigned_group.users.all().values_list('email', flat=True)
             users = list(admin_and_managers) + list(group_members)
             unique_users = set(users)
             notify_user(message, list(unique_users))
@@ -69,24 +71,24 @@ def update_ticket(sender, instance, created, **kwargs):
                 break
         else:
             request = None
-        message = f'''A ticket has been updated for {instance.assigned_group}
+        message = f'''A ticket has been updated for {instance.get_assigned_group()}
                 \nTitle: {instance.title}
                 \nDescription: {instance.description}
                 \nPriority: {instance.priority}
                 \nState: {instance.get_state()}
-                \nBoard: {instance.board}
+                \nBoard: {instance.get_board()}
                 \nClassification: {instance.classification}
-                \nAssigned User: {instance.assigned_user}
-                \nAssigned Group: {instance.assigned_group}
+                \nAssigned User: {instance.get_assigned_users()}
+                \nAssigned Group: {instance.get_assigned_group()}
 
                 '''
 
         logMessage = f'''Priority: {instance.priority}
         State: {instance.get_state()}
-        Board: {instance.board}
+        Board: {instance.get_board()}
         Classification: {instance.classification}
-        Assigned User: {instance.assigned_user}
-        Assigned Group: {instance.assigned_group}
+        Assigned User: {instance.get_assigned_users()}
+        Assigned Group: {instance.get_assigned_group()}
         '''
         log = TicketLog(ticket_name=instance.title, ticket_id=instance.id, title="Updated",
                         updated_by=request.user, description=logMessage)
@@ -101,7 +103,9 @@ def update_ticket(sender, instance, created, **kwargs):
                 users = []
                 admin_and_managers = Account.objects.filter(
                     is_superuser=True, is_admin=True).values_list('email', flat=True)
-                group_members = instance.assigned_group.users.all().values_list('email', flat=True)
+                group_members = []
+                if hasattr(instance, 'assigned_groups'):
+                    group_members = instance.assigned_group.users.all().values_list('email', flat=True)
                 users = list(admin_and_managers) + list(group_members)
                 unique_users = set(users)
 
@@ -121,23 +125,23 @@ def delete_ticket(sender, instance, **kwargs):
             break
     else:
         request = None
-    message = f'''A ticket has been deleted for {instance.assigned_group}
+    message = f'''A ticket has been deleted for {instance.get_assigned_group()}
             \nTitle: {instance.title}
             \nDescription: {instance.description}
             \nPriority: {instance.priority}
             \nState: {instance.get_state()}
-            \nBoard: {instance.board}
+            \nBoard: {instance.get_board()}
             \nClassification: {instance.classification}
-            \nAssigned User: {instance.assigned_user}
-            \nAssigned Group: {instance.assigned_group}
+            \nAssigned User: {instance.get_assigned_users()}
+            \nAssigned Group: {instance.get_assigned_group()}
 
             '''
     logMessage = f'''Priority: {instance.priority}
         State: {instance.get_state()}
-        Board: {instance.board}
+        Board: {instance.get_board()}
         Classification: {instance.classification}
-        Assigned User: {instance.assigned_user}
-        Assigned Group: {instance.assigned_group}
+        Assigned User: {instance.get_assigned_users()}
+        Assigned Group: {instance.get_assigned_group()}
         '''
     log = TicketLog(ticket_name=instance.title, ticket_id=instance.id, title="Ticket Deleted",
                     updated_by=request.user, description=logMessage)
@@ -147,14 +151,14 @@ def delete_ticket(sender, instance, **kwargs):
         APP_NAME = getattr(settings, "APP_NAME", None)
         URL = getattr(settings, "URL", None)
 
-        if created == False:
-
-            users = []
-            admin_and_managers = Account.objects.filter(
-                is_superuser=True, is_admin=True).values_list('email', flat=True)
+        users = []
+        admin_and_managers = Account.objects.filter(
+            is_superuser=True, is_admin=True).values_list('email', flat=True)
+        group_members = []
+        if hasattr(instance, 'assigned_groups'):
             group_members = instance.assigned_group.users.all().values_list('email', flat=True)
-            users = list(admin_and_managers) + list(group_members)
-            unique_users = set(users)
+        users = list(admin_and_managers) + list(group_members)
+        unique_users = set(users)
 
-            notify_user(message, list(unique_users))
-            process_tasks()
+        notify_user(message, list(unique_users))
+        process_tasks()

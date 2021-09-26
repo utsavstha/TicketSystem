@@ -6,22 +6,39 @@ var filteredBoards = []
 var selectedAccounts = []
 var filteredAccounts = []
 
+var selectedPriorities = []
+var filteredPriorities = []
+
+var selectedClassifications = []
+var filteredClassifications = []
+
 var groups_select = undefined
 var boards_select = undefined
 var users_select = undefined
+var priority_select = undefined
+var classification_select = undefined
 
 
 const allBoards = JSON.parse(JSON.parse(document.getElementById('boards').textContent));
 const allGroups = JSON.parse(JSON.parse(document.getElementById('groups').textContent));
 const allAccounts = JSON.parse(JSON.parse(document.getElementById('accounts').textContent));
+const allPriorities = JSON.parse(JSON.parse(document.getElementById('priorities').textContent));
+const allClassifications = JSON.parse(JSON.parse(document.getElementById('classifications').textContent));
+
 if (ticket) {
     document.getElementById("staff_complete").checked = ticket.fields.can_staff_complete;
     selectedGroups = ticket.fields.assigned_group;
     selectedBoards = ticket.fields.board;
+    console.log("boards", selectedBoards);
     selectedAccounts = ticket.fields.assigned_user;
-    // console.log(selectedBoards);
+    selectedPriorities = ticket.fields.priority;
+    selectedClassifications = ticket.fields.classification;
+    filterPriorities(ticket.fields.priority)
+    filterClassifications(ticket.fields.classification)
     // selectedGroups.push(ticket.fields.groups.all)
 }
+// addPriorities();
+
 filteredAccounts = allAccounts
 // Initialize function, create initial tokens with itens that are already selected by the user
 function init(element) {
@@ -67,8 +84,12 @@ function init(element) {
         boards_select = element;
     } else if (element.id == "assigned-users") {
         users_select = element;
+    } else if (element.id == "priority") {
+        priority_select = element;
+    } else if (element.id == "classification") {
+        classification_select = element;
     }
-    // console.log(element);
+    console.log("element", element);
     createInitialTokens(element);
     addPlaceholder(wrapper);
 }
@@ -91,12 +112,13 @@ function createInitialTokens(select) {
     let {
         options_selected
     } = getOptions(select);
+    console.log("createInitialTokens", select.id);
+    console.log("createInitialTokens", options_selected);
     const wrapper = select.parentNode;
+
     for (let i = 0; i < options_selected.length; i++) {
         createToken(wrapper, options_selected[i], select.id);
     }
-
-
 
 }
 
@@ -157,6 +179,7 @@ function createToken(wrapper, target, parent = "none") {
     const token_span = document.createElement("span");
     token_span.classList.add("selected-label");
     var id = 0;
+    console.log("createToken", parent);
     if (target.dataset == undefined) {
         if (parent == "group") {
             for (let i = 0; i < allGroups.length; i++) {
@@ -175,7 +198,6 @@ function createToken(wrapper, target, parent = "none") {
             }
         } else if (parent == "assigned-users") {
             for (let i = 0; i < allAccounts.length; i++) {
-
                 if (allAccounts[i].pk == target) {
                     token_span.innerText = allAccounts[i].fields.email;
                     id = allAccounts[i].pk
@@ -307,20 +329,28 @@ function selectOption(e) {
     if (e.target.parentNode.id == "group") {
         selectedGroups.push(e.target.id);
 
-        for (let i = 0; i < allBoards.length; i++) {
-            if (allBoards[i].fields.group.toString() == e.target.id) {
-                filteredBoards.push(allBoards[i])
-            }
-        }
+        // for (let i = 0; i < allBoards.length; i++) {
+        //     if (allBoards[i].fields.group.toString() == e.target.id) {
+        //         filteredBoards.push(allBoards[i])
 
+
+        //     }
+
+        // }
         populateAutocompleteList(boards_select, "", true)
-        // populateAutocompleteList(groups_select, "", true)
-
+        // addPriorities()
     } else if (e.target.parentNode.id == "boards") {
-        selectedBoards.push(e.target.id);
+        selectedBoards.push(parseInt(e.target.id));
+        filterPriorities()
+        filterClassifications()
     } else if (e.target.parentNode.id == "assigned-users") {
         selectedAccounts.push(e.target.id);
     }
+    // else if (e.target.parentNode.id == "priority") {
+    //     selectedPriorities.push(e.target.id);
+    // } else if (e.target.parentNode.id == "classification") {
+    //     selectedClassifications.push(e.target.id);
+    // }
     // populateAutocompleteList(select, "")
 
     // console.log(e.target.parentNode);
@@ -375,7 +405,7 @@ function getOptions(select) {
         all_options = allGroups.map(el => [el.fields.name, el.pk.toString()])
         options_selected = selectedGroups
     } else if (select.id == "boards") {
-        all_options = filteredBoards.map(el => [el.fields.title, el.pk.toString()])
+        all_options = allBoards.map(el => [el.fields.title, el.pk.toString()])
         options_selected = selectedBoards
     } else if (select.id == "assigned-users") {
         all_options = filteredAccounts.map(el => [el.fields.email, el.pk.toString()])
@@ -398,7 +428,6 @@ function getOptions(select) {
     });
 
     autocomplete_options.sort();
-
     return {
         options_selected,
         autocomplete_options,
@@ -437,8 +466,8 @@ function removeToken(e) {
     if (select.id == "group") {
 
         var updatedFilteredBoards = []
-        console.log(selectedGroups);
-        console.log(e.target);
+
+
 
         for (let i = 0; i < selectedGroups.length; i++) {
             if (selectedGroups[i] == e.target.id) {
@@ -464,6 +493,29 @@ function removeToken(e) {
                 delete selectedBoards[i];
             }
         }
+
+        // populateAutocompleteList(boards_select, "", true)
+
+
+        // for (let i = 0; i < filteredPriorities.length; i++) {
+        //     if (filteredPriorities[i].fields.board.toString() == e.target.id) {
+        //         // filteredBoards.splice(i, 1)
+        //         updatedFilteredPriorities.push(filteredPriorities[i])
+        //     }
+        // }
+        // filteredPriorities = updatedFilteredPriorities
+
+        // for (let i = 0; i < filteredClassifications.length; i++) {
+        //     if (filteredClassifications[i].fields.board.toString() == e.target.id) {
+        //         // filteredBoards.splice(i, 1)
+        //         var updatedFilteredClassifications = []
+        //             .push(filteredClassifications[i])
+        //     }
+        // }
+        // filteredClassifications = updatedFilteredClassifications
+        // populateAutocompleteList(priority_select, "", true)
+        // populateAutocompleteList(classification_select, "", true)
+
     } else if (select.id == "assigned-users") {
         for (let i = 0; i < selectedAccounts.length; i++) {
             if (selectedAccounts[i] == e.target.id) {
@@ -471,6 +523,20 @@ function removeToken(e) {
             }
         }
     }
+
+    // else if (select.id == "priority") {
+    //     for (let i = 0; i < selectedPriorities.length; i++) {
+    //         if (selectedPriorities[i] == e.target.id) {
+    //             delete selectedPriorities[i];
+    //         }
+    //     }
+    // } else if (select.id == "classification") {
+    //     for (let i = 0; i < selectedClassifications.length; i++) {
+    //         if (selectedClassifications[i] == e.target.id) {
+    //             delete selectedClassifications[i];
+    //         }
+    //     }
+    // }
 
 
     e.target.parentNode.remove();
@@ -548,11 +614,6 @@ function onPostForm() {
         return;
     }
 
-    if (selectedGroups.length <= 0) {
-        alert("Please select a group")
-        return;
-    }
-
     if (selectedBoards.length <= 0) {
         alert("Please select a Board")
         return;
@@ -561,11 +622,11 @@ function onPostForm() {
     var data = new FormData();
     data.append('ticket_name', ticket_name.value);
     data.append('description', description.value);
-    data.append('priority', priority.value);
-    data.append('classification', classification.value);
-    console.log(selectedAccounts);
+    console.log(classification.value);
     data.append('groups', selectedGroups);
     data.append('boards', selectedBoards);
+    data.append('priority', priority.value);
+    data.append('classification', classification.value);
     data.append('users', selectedAccounts);
     data.append('staff_complete', staff_complete.checked);
     for (let i = 0; i < files.length; i++) {
@@ -595,6 +656,54 @@ function addOption(target, val, text) {
     opt.value = val;
     opt.innerHTML = text;
     select.appendChild(opt);
+}
+
+function filterPriorities(id = undefined) {
+    let element = document.getElementById("priority")
+    element.innerHTML = ""
+    console.log("filter prio", allPriorities);
+    for (let i = 0; i < allPriorities.length; i++) {
+        for (let j = 0; j < selectedBoards.length; j++) {
+            if (allPriorities[i].fields.board == selectedBoards[j]) {
+                var opt = document.createElement('option');
+                opt.value = allPriorities[i].pk;
+                opt.innerHTML = allPriorities[i].fields.name;
+                if (id != undefined) {
+                    if (id == allPriorities[i].pk) {
+                        opt.selected = true;
+                    }
+                }
+
+                element.appendChild(opt);
+                console.log(element);
+
+            }
+        }
+
+    }
+}
+
+function filterClassifications(id = undefined) {
+    let element = document.getElementById("classification")
+    // element.innerHTML = ""
+    for (let i = 0; i < allClassifications.length; i++) {
+        for (let j = 0; j < selectedBoards.length; j++) {
+            console.log("all classification", selectedBoards);
+            if (allClassifications[i].fields.board == selectedBoards[j]) {
+                var opt = document.createElement('option');
+                opt.value = allClassifications[i].pk;
+                opt.innerHTML = allClassifications[i].fields.name;
+                if (id != undefined) {
+                    if (id == allClassifications[i].pk) {
+                        opt.selected = true;
+                    }
+                }
+
+                element.appendChild(opt);
+            }
+        }
+
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {

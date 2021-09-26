@@ -66,30 +66,16 @@ class Group(models.Model):
     def __str__(self):
         return self.name
 
-
-class Priority(models.Model):
-    name = models.CharField(max_length=200, null=True)
-    color = models.CharField(max_length=10, null=True)
-    priority_value = models.IntegerField()
-
-    def __str__(self):
-        return self.name
-
-    def get_id(self):
-        return Int(self.id)
-
-
-class Classification(models.Model):
-    name = models.CharField(max_length=200, null=True)
-
-    def __str__(self):
-        return self.name
+    @property
+    def number_of_users(self):
+        return len(self.users.all())
 
 
 class State(models.Model):
     name = models.CharField(max_length=50, null=True)
 
 
+'''
 class Board(models.Model):
     title = models.CharField(max_length=200, null=True)
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
@@ -100,7 +86,7 @@ class Board(models.Model):
     def get_all():
         all_boards = []
         boards = Board.objects.all()
-        all_boards.append({"title": "General", "id": '-1'})
+        all_boards.append({"title": "General", "id": -1})
 
         for i in range(len(boards)):
             all_boards.append(boards[i])
@@ -109,10 +95,87 @@ class Board(models.Model):
     def filter_all(group):
         all_boards = []
         boards = Board.objects.filter(group__in=group)
-        all_boards.append({"title": "General", "id": '-1'})
+        all_boards.append({"title": "General", "id": -1})
         for i in range(len(boards)):
             all_boards.append(boards[i])
         return all_boards
+'''
+
+
+class Board(models.Model):
+    title = models.CharField(max_length=200, null=True)
+    group = models.ManyToManyField(Group)
+    supervisor = models.ManyToManyField(
+        Account, blank=True, related_name='board_supervisors')
+
+    def __str__(self):
+        return self.title
+
+    def get_general():
+        return {"title": "General", "id": -1}
+
+    def remove_general(boards):
+        if boards != None:
+            new_boards = []
+            for board in boards:
+                if type(board) != dict:
+                    new_boards.append(board)
+            return new_boards
+
+    def get_all():
+        all_boards = []
+        boards = Board.objects.all()
+        all_boards.append({"title": "General", "id": -1})
+
+        for i in range(len(boards)):
+            all_boards.append(boards[i])
+        return all_boards
+
+    def filter_by_ids(ids):
+        general_board_found = False
+        print("filter_by_ids", ids)
+        if '-1' in ids:
+            ids.remove('-1')
+            general_board_found = True
+        if -1 in ids:
+            ids.remove(-1)
+            general_board_found = True
+        boards = Board.objects.filter(id__in=ids)
+        all_boards = []
+        if general_board_found:
+            all_boards.append({"title": "General", "id": -1})
+        for i in range(len(boards)):
+            all_boards.append({"title": boards[i].title, "id": boards[i].id})
+        return all_boards
+
+    def filter_all(group):
+        all_boards = []
+        boards = Board.objects.filter(group__in=group)
+        all_boards.append({"title": "General", "id": -1})
+        for i in range(len(boards)):
+            all_boards.append(boards[i])
+        return all_boards
+
+
+class Priority(models.Model):
+    name = models.CharField(max_length=200, null=True)
+    color = models.CharField(max_length=10, null=True)
+    priority_value = models.IntegerField()
+    board = models.ForeignKey(Board, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+    def get_id(self):
+        return int(self.id)
+
+
+class Classification(models.Model):
+    name = models.CharField(max_length=200, null=True)
+    board = models.ForeignKey(Board, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
 
 
 class Ticket(models.Model):
@@ -127,28 +190,58 @@ class Ticket(models.Model):
         Classification, on_delete=models.CASCADE)
     can_staff_complete = models.BooleanField()
 
-    def searchTicket(group=None, search_keyword='', priority_id='-1', user=None):
+    def searchTicket(group=None, search_keyword='', user=None, boards=None):
         tickets = []
+        boards = Board.remove_general(boards)
+        # print(boards)
+        # if boards != None:
+        #     tickets = Ticket.objects.filter(
+        #         title__icontains=search_keyword, board__in=boards)
+        # else:
+        #     tickets = Ticket.objects.filter(title__icontains=search_keyword)
+
+        # if user != None:
+        #     tickets = Ticket.objects.filter(
+        #         assigned_user=user)
+
         if group != None:
-            if priority_id != '-1':
+            if boards != None:
                 tickets = Ticket.objects.filter(
-                    assigned_group__in=group, title__contains=search_keyword,
-                    priority__pk=priority_id)
+                    title__icontains=search_keyword, board__in=boards)
             else:
                 tickets = Ticket.objects.filter(
-                    assigned_group__in=group, title__contains=search_keyword)
+                    title__icontains=search_keyword)
         else:
-            if priority_id != '-1':
-                tickets = Ticket.objects.filter(
-                    title__contains=search_keyword, priority__pk=priority_id)
-            else:
-                if user != None:
+            if user != None:
+                if boards != None:
                     tickets = Ticket.objects.filter(
-                        assigned_user=user, title__contains=search_keyword)
+                        assigned_user=user, title_icontains=search_keyword, board__in=boards)
                 else:
                     tickets = Ticket.objects.filter(
-                        title__contains=search_keyword)
+                        assigned_user=user, title_icontains=search_keyword)
+            else:
+                if boards != None:
+                    tickets = Ticket.objects.filter(
+                        title__icontains=search_keyword, board__in=boards)
+                else:
+                    tickets = Ticket.objects.filter(
+                        title__icontains=search_keyword)
+
         return tickets
+
+    def get_assigned_users(self):
+        users = ', '.join(self.assigned_user.values_list('email', flat=True))
+        return users if len(self.assigned_user.all()) > 0 else "Unassgined"
+
+    def get_board(self):
+        boards = ', '.join(self.board.values_list('title', flat=True))
+        return boards if len(self.board.all()) > 0 else "Unassgined"
+
+    def get_assigned_group(self):
+        assigned_group = ', '.join(
+            self.assigned_group.values_list('name', flat=True))
+        print(assigned_group)
+        return assigned_group if len(self.assigned_group.all()) > 0 else "Unassgined"
 
     def get_state(self):
         state = "Todo"
@@ -179,33 +272,33 @@ class Ticket(models.Model):
 
         return (todo, progress, review, completed)
 
-    def get_tickets(tickets, selected_board):
+    def get_tickets(tickets, selected_boards):
         todo = []
         progress = []
         review = []
         completed = []
         for ticket in tickets:
             for ticket_board in ticket.board.all():
-                if selected_board == None:
-                    if ticket.state == 0:
-                        todo.append(ticket)
-                    elif ticket.state == 1:
-                        progress.append(ticket)
-                    elif ticket.state == 2:
-                        review.append(ticket)
-                    elif ticket.state == 3:
-                        completed.append(ticket)
-                elif ticket_board.id == selected_board.id:
-                    print(ticket.state)
-                    if ticket.state == 0:
-                        todo.append(ticket)
-                    elif ticket.state == 1:
-                        progress.append(ticket)
-                    elif ticket.state == 2:
-                        review.append(ticket)
-                    elif ticket.state == 3:
-                        completed.append(ticket)
-        return (todo, progress, review, completed)
+                for selected_board in selected_boards:
+                    if selected_board['id'] == -1:
+                        if ticket.state == 0:
+                            todo.append(ticket)
+                        elif ticket.state == 1:
+                            progress.append(ticket)
+                        elif ticket.state == 2:
+                            review.append(ticket)
+                        elif ticket.state == 3:
+                            completed.append(ticket)
+                    elif ticket_board.id == int(selected_board['id']):
+                        if ticket.state == 0:
+                            todo.append(ticket)
+                        elif ticket.state == 1:
+                            progress.append(ticket)
+                        elif ticket.state == 2:
+                            review.append(ticket)
+                        elif ticket.state == 3:
+                            completed.append(ticket)
+        return (set(todo), set(progress), set(review), set(completed))
 
     def __str__(self):
         return self.title
@@ -228,9 +321,23 @@ class TicketComment(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(verbose_name="timestamp", auto_now=True)
     posted_by = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
+    parent = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.DO_NOTHING)
+
+    class Meta:
+        ordering = ['-timestamp']
 
     def __str__(self):
         return self.comment
+
+    def children(self):
+        return TicketComment.objects.filter(parent=self)
+
+    @property
+    def is_parent(self):
+        if self.parent is not None:
+            return False
+        return True
 
 
 class TicketAttachment(models.Model):

@@ -5,9 +5,10 @@ function dragStart(ev) {
     // The 'text/plain' is referring the Data Type (DOMString) 
     // of the Object being dragged.
     // ev.target.id is the id of the Object being dragged
-    var caller = ev.target || ev.srcElement;
 
-    ev.dataTransfer.setData("text/plain", ev.target.id);
+    var caller = ev.target.parentElement || ev.srcElement;
+    console.log(ev.target.parentElement);
+    ev.dataTransfer.setData("text/plain", ev.target.parentElement.id);
     ev.dataTransfer.setData("id", caller.id);
 
 }

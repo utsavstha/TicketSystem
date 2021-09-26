@@ -36,16 +36,16 @@ def create_ticket(request):
         groups = groups.split(",") if "," in groups else groups
         boards = boards.split(",") if "," in boards else boards
         users = users.split(",") if "," in users else users
+        classification_instance = Classification.objects.get(
+            pk=classification)
 
-        classification_instance = Classification.objects.filter(
-            name=classification).first()
-
-        priority_instance = Priority.objects.filter(name=priority).first()
+        priority_instance = Priority.objects.get(pk=priority)
 
         ticket = Ticket(title=ticket_name, description=description,
                         priority=priority_instance, classification=classification_instance,
                         can_staff_complete=staff)
         ticket.save()
+        print(groups)
         group_instance = Group.objects.filter(pk__in=groups)
         board_instance = Board.objects.filter(pk__in=boards)
         ticket.assigned_group.set(group_instance)
@@ -67,6 +67,8 @@ def create_ticket(request):
                'priorities': priorities, 'classifications': classifications,
                'groups': groups, 'boards': boards, 'groups_serialized': serializers.serialize('json', groups),
                'boards_serialized': serializers.serialize('json', boards),
+               'priority_serialized': serializers.serialize('json', priorities),
+               'classification_serialized': serializers.serialize('json', classifications),
                'accounts_serialized': serializers.serialize('json', accounts),
                'accounts': accounts, 'file_form': file_form}
     return render(request, 'ticket/ticket_form.html', context)
@@ -86,9 +88,9 @@ def quick_attach(request, pk):
 @login_required(login_url='/login')
 def ticket_info(request, pk):
     ticket = Ticket.objects.get(id=pk)
-    logs = TicketLog.objects.filter(ticket_id=pk)
+    logs = TicketLog.objects.filter(ticket_id=pk).order_by('-timestamp')
     attachments = TicketAttachment.objects.filter(ticket=ticket)
-    comments = TicketComment.objects.filter(ticket=ticket)
+    comments = TicketComment.objects.filter(ticket=ticket, parent=None)
     file_form = TicketAttachmentForm()
 
     context = {'ticket': ticket,
@@ -103,8 +105,10 @@ def ticket_info(request, pk):
 def post_comment(request, pk):
     ticket = Ticket.objects.get(id=pk)
     content = request.POST.get('content')
+    parent = request.POST.get('parent')
+    parent_instance = TicketComment.objects.filter(id=parent)
     comment = TicketComment(
-        comment=content, ticket=ticket, posted_by=request.user)
+        comment=content, ticket=ticket, parent=parent_instance.first(), posted_by=request.user)
     comment.save()
     return redirect('ticket_info', pk=pk)
 
@@ -138,10 +142,10 @@ def update_ticket(request, pk):
         boards = boards.split(",") if "," in boards else boards
         users = users.split(",") if "," in users else users
 
-        classification_instance = Classification.objects.filter(
-            name=classification).first()
+        classification_instance = Classification.objects.get(
+            pk=classification)
 
-        priority_instance = Priority.objects.filter(name=priority).first()
+        priority_instance = Priority.objects.get(pk=priority)
         ticket = Ticket.objects.get(id=pk)
         ticket.title = ticket_name
         ticket.description = description
@@ -152,14 +156,17 @@ def update_ticket(request, pk):
         #                 priority=priority_instance, classification=classification_instance,
         #                 can_staff_complete=staff)
         ticket.save()
-        group_instance = Group.objects.filter(pk__in=groups)
-        board_instance = Board.objects.filter(pk__in=boards)
+        print(users)
+        group_instance = Group.objects.filter(pk__in=filter(len, groups))
+        board_instance = Board.objects.filter(pk__in=filter(len, boards))
         ticket.assigned_group.set(group_instance)
         ticket.board.set(board_instance)
 
         if len(users) > 0:
-            user_instance = Account.objects.filter(pk__in=users)
+            user_instance = Account.objects.filter(pk__in=filter(len, users))
             ticket.assigned_user.set(user_instance)
+        else:
+            ticket.assigned_user.clear()
 
         ticket.save()
 
@@ -175,6 +182,8 @@ def update_ticket(request, pk):
                'ticket_serialized': serializers.serialize('json', [ticket, ]),
                'boards': boards, 'groups_serialized': serializers.serialize('json', groups),
                'boards_serialized': serializers.serialize('json', boards),
+               'priority_serialized': serializers.serialize('json', priorities),
+               'classification_serialized': serializers.serialize('json', classifications),
                'accounts_serialized': serializers.serialize('json', accounts),
                'accounts': accounts, 'file_form': file_form, 'ticket': ticket, 'attachments': ticketAttachments}
     return render(request, 'ticket/ticket_update_form.html', context)
@@ -231,7 +240,7 @@ def change_state(request):
             id = id.split("-")[1]
         ticket = Ticket.objects.get(id=id)
         print("before", ticket.state)
-        if has_privilages(current_user, id, state) or ticket.can_staff_complete:
+        if has_privilages(current_user, id, state):
             ticket.state = state
             ticket.save()
             print("after", state)
@@ -242,32 +251,100 @@ def change_state(request):
     return JsonResponse({"status": True})
 
 
+def check_supervisor(user, boards, groups):
+    board_supervisors = []
+    for board in boards:
+        board_supervisors += get_all_supervisors_for_board(board)
+
+    for supervisor in board_supervisors:
+        if str(user) == str(supervisor):
+            return True
+
+    group_supervisors = []
+    for group in groups:
+        group_supervisors += get_all_supervisors_for_group(group)
+
+    for supervisor in group_supervisors:
+        if str(user) == str(supervisor):
+            return True
+
+    return False
+
+
+def get_all_supervisors_for_group(group):
+    group = Group.objects.get(pk=group.id)
+    return list(group.supervisor.all().values_list('email', flat=True))
+
+
+def get_all_supervisors_for_board(board):
+    board = Board.objects.get(pk=board.id)
+    return list(board.supervisor.all().values_list('email', flat=True))
+
+
 def has_privilages(user, ticketId, state):
+    ticket = Ticket.objects.get(id=ticketId)
+    assigned_boards = ticket.board.all()
+    assigned_groups = ticket.assigned_group.all()
+
     if user.is_superuser or user.is_admin:
         return True
+    elif check_supervisor(user, assigned_boards, assigned_groups):
+        print("supervisor")
+        return True
     else:
-        print(state)
+        # assigned_users = list(ticket.assigned_user.all().values_list('email', flat=True)))
+        if int(state) == 3:
+            return False
+        if isAssigned(user, ticket.assigned_user.all().values_list('email', flat=True)):
+            print("assigned")
+            return True
+        '''
         groups = Group.objects.filter(users=user)
-        ticket = Ticket.objects.get(id=ticketId)
         for group in groups:
-            if ticket.assigned_group == group:
-                if int(state) == 3:
-                    for supervisor in group.supervisor.all():
-                        if supervisor == user:
+            for assgined_group in ticket.assigned_group.all():
+                if assgined_group == group:
+                    print("in group")
+                    if int(state) == 3:
+                        if isSupervisor(group.supervisor.all(), user):
                             return True
-                else:
-                    return True
+                        elif ticket.can_staff_complete:
+                            if isAssigned(user, ticket.assigned_user.all()):
+                                print("assigned")
+                                return True
+                    else:
+                        if isSupervisor(group.supervisor.all(), user):
+                            return True
+                        elif isAssigned(user, ticket.assigned_user.all()):
+                            print("assigned")
+                            return True
+        '''
+
         return False
 
 
-@login_required(login_url='/login')
+def isSupervisor(supervisors, user):
+    for supervisor in supervisors:
+        if supervisor == user:
+            return True
+    return False
+
+
+def isAssigned(user, users):
+    for u in users:
+        if str(u) == str(user):
+            print("isAssigned", True)
+            return True
+    return False
+
+
+@ login_required(login_url='/login')
 def view_logs(request, pk):
     logs = TicketLog.objects.filter(ticket_id=pk)
     context = {'logs': logs}
     return render(request, 'ticket/ticket_log.html', context)
 
 
-@login_required(login_url='/login')
+@ login_required(login_url='/login')
 def delete_ticket(request, pk):
     ticket = Ticket.objects.get(id=pk)
     ticket.delete()
@@ -275,7 +352,7 @@ def delete_ticket(request, pk):
     return redirect('/tickets')
 
 
-@login_required(login_url='/login')
+@ login_required(login_url='/login')
 def delete_attachment(request, pk):
     ticket = TicketAttachment.objects.get(id=pk)
     ticket.delete()

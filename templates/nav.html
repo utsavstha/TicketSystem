@@ -1,13 +1,19 @@
 <nav class="fixed-top align-top" id="sidebar-wrapper" role="navigation">
     <div class="simplebar-content" style="padding: 0px;">
         <a class="sidebar-brand" href="#">
-            <span class="align-middle">Ticketing System</span>
+            <div class="d-flex justify-content-between">
+                <span class="align-middle">Ticketing System</span>
+                <!-- <div id="close" class="nav-icon1 hamburger animated fadeInLeft is-closed" data-toggle="offcanvas">
+                    <i class="fas fa-times"></i>
+                </div> -->
+            </div>
+
         </a>
 
         <ul class="navbar-nav align-self-stretch">
-            <li class="sidebar-header">
+            <!-- <li class="sidebar-header">
                 Pages
-            </li>
+            </li> -->
             <li class="">
                 <a href="{% url 'boards'%}" class="nav-link text-left {{activate_board}}" role="button"
                     aria-haspopup="true" aria-expanded="false">
@@ -16,11 +22,12 @@
             </li>
             {% if request.user.is_superuser %}
             <li class="">
-                <a href="{% url 'create_board' %}" class="nav-link text-left {{activate_create_board}}" role="button"
+                <a href="{% url 'manage_board'%}" class="nav-link text-left {{activate_manage_board}}" role="button"
                     aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-home"></i> Add New Board
+                    <i class="fas fa-home"></i> Manage Board
                 </a>
             </li>
+
             <li class="">
                 <a href="{% url 'tickets'%}" class="nav-link text-left {{activate_tickets}}" role="button"
                     aria-haspopup="true" aria-expanded="false">

@@ -5,7 +5,7 @@
 {% load static %}
 <div id="page-content-wrapper">
     <div id="content">
-        <div class="container-fluid p-0 px-lg-0 px-md-0">
+        <div class="container-fluid">
             <!-- Topbar -->
             {% include 'topbar.html' %}
 
@@ -13,17 +13,47 @@
                 {% csrf_token %}
                 <input type="text" id="search_keyword" name="search_keyword" value="{{search_keyword}}">
                 <input type="text" id="selected_priority" name="selected_priority" value="{{selected_priority}}">
+                <input type="text" id="selected_boards" name="selected_boards" value="{{selected_boards}}">
+
                 <button type="submit" class="btn btn-primary">Submit</button>
 
             </form>
 
             <div class="col-md-12">
-
                 <div class="board-layout">
-
                     <div class="card">
                         <div class="card-body">
                             <!-- title -->
+                            <div class="d-md-flex align-items-center">
+                                <div class="left">
+                                    <div class="board-text">{{board}}</div>
+
+                                </div>
+
+                                <div class="ml-auto">
+                                    <div class="dl">
+
+                                        <div class="btn-group">
+                                            <select multiple id="board-select" name="board-select" class="custom-select"
+                                                onChange="filterboard()">
+
+                                                {% for board in boards %}
+                                                {% if board.id in selected_boards %}
+
+                                                <option selected value="{{board.id}}">{{board.title}}</option>
+                                                {% else %}
+                                                <option value="{{board.id}}">{{board.title}}</option>
+                                                {% endif %}
+                                                {% endfor %}
+
+                                            </select>
+
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
                             <div class="d-md-flex align-items-center">
                                 <div>
 
@@ -39,15 +69,21 @@
                                     </div>
 
                                 </div>
+                                {% if request.user.is_superuser or request.user.is_admin %}
+
+                                <a href="{% url 'create_ticket' %}"
+                                    class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm ml-3">
+                                    Add New Ticket<i class="fas fa-plus-circle mx-2"></i></a>
+                                {% endif %}
                                 <br />
 
-                                <div class="ml-auto">
+                                <div class="ml-auto" hidden>
 
                                     {% csrf_token %}
                                     <div class="dl">
                                         <select id="priority_select" name="priority_select" class="custom-select"
                                             onChange="filterPriority()">
-                                            <option value="-1" {% if selected_priority in '-1' %} selected {% endif %}>
+                                            <option value="-1" {% if selected_priority in -1 %} selected {% endif %}>
                                                 None</option>
                                             {% for priority in priorities %}
 
@@ -61,153 +97,12 @@
 
                                 </div>
                             </div>
+                            <br />
 
-                            <!-- title -->
-                        </div>
-                        <div class="card-body">
-                            <!-- title -->
-                            <div class="d-md-flex align-items-center">
-                                <div>
-                                    <h4 class="card-title">Boards</h4>
-                                    <h5 class="card-subtitle">List of all available Boards</h5>
-                                </div>
-
-
-                            </div>
-
-                            <div class="d-md-flex align-items-center mt-100">
-                                <div class="left">
-                                    <div class="board-text">General</div>
-                                </div>
-                                <div class="ml-auto">
-                                    <div class="dl">
-                                        {% if request.user.is_superuser or request.user.is_admin %}
-
-                                        <a href="{% url 'create_ticket' %}"
-                                            class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
-                                            Add New Ticket<i class="fas fa-plus-circle mx-2"></i></a>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- General Board -->
-                            <div class="board-lists" style="height: 400px; overflow-y: scroll;">
-                                <div id='list1' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
-                                    <div class="list-title">
-                                        <div class="d-flex justify-content-between">
-                                            <span>To Do</span>
-                                            <div class="d-flex justify-content-between">
-                                                <span class="up-arrow">
-                                                    ▲
-                                                </span>
-                                                <span class="down-arrow">
-                                                    ▼
-                                                </span>
-                                            </div>
-
-
-                                        </div>
-                                    </div>
-                                    {% for ticket in todo_general %}
-                                    {% include 'ticket_item_general_board.html' %}
-                                    {% endfor %}
-
-                                </div>
-                                <div id='list2' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
-                                    <div class="list-title">
-                                        <div class="d-flex justify-content-between">
-                                            <span>In Progress</span>
-                                            <div class="d-flex justify-content-between">
-                                                <span class="up-arrow">
-                                                    ▲
-                                                </span>
-                                                <span class="down-arrow">
-                                                    ▼
-                                                </span>
-                                            </div>
-
-
-                                        </div>
-                                    </div>
-                                    {% for ticket in progress_general %}
-                                    {% include 'ticket_item_general_board.html' %}
-                                    {% endfor %}
-
-                                </div>
-
-                                <div id='list3' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
-                                    <div class="list-title">
-                                        <div class="d-flex justify-content-between">
-                                            <span>In Review</span>
-                                            <div class="d-flex justify-content-between">
-                                                <span class="up-arrow">
-                                                    ▲
-                                                </span>
-                                                <span class="down-arrow">
-                                                    ▼
-                                                </span>
-                                            </div>
-
-
-                                        </div>
-                                    </div>
-                                    {% for ticket in review_general %}
-                                    {% include 'ticket_item_general_board.html' %}
-                                    {% endfor %}
-
-                                </div>
-                                <div id='list4' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
-                                    <div class="list-title">
-                                        <div class="d-flex justify-content-between">
-                                            <span>Completed</span>
-                                            <div class="d-flex justify-content-between">
-                                                <span class="up-arrow">
-                                                    ▲
-                                                </span>
-                                                <span class="down-arrow">
-                                                    ▼
-                                                </span>
-                                            </div>
-
-
-                                        </div>
-                                    </div>
-                                    {% for ticket in completed_general %}
-                                    {% include 'ticket_item_general_board.html' %}
-                                    {% endfor %}
-
-                                </div>
-                            </div>
-                            <div class="d-md-flex align-items-center mt-100">
-                                <div class="left">
-                                    <div class="board-text">{{board.title}}</div>
-                                </div>
-                                <div class="ml-auto">
-                                    <div class="d-flex justify-content-end">
-                                        <div class="btn-group">
-                                            <button type="button" class="btn btn-sm btn-success dropdown-toggle"
-                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                Boards
-                                            </button>
-                                            <div class="dropdown-menu">
-                                                {% for board in boards %}
-                                                <a class="dropdown-item"
-                                                    href="{% url 'boards' board.id %}">{{board.title}}
-                                                    <span hidden>{{board.id}}</span></a>
-                                                {% endfor %}
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-
-                                </div>
-                            </div>
-                            <!-- Selected board -->
-                            <div class="board-lists" style="height: 400px; overflow-y: scroll;">
+                            <!-- Selected board style="height: 400px; overflow-y: scroll;"-->
+                            <div class="board-lists">
                                 <div id='list5' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
-                                    <div class="list-title">
+                                    <div class="list-title fixed-element">
                                         <div class="d-flex justify-content-between">
                                             <span>To Do</span>
                                             <div class="d-flex justify-content-between">
@@ -228,7 +123,7 @@
 
                                 </div>
                                 <div id='list6' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
-                                    <div class="list-title">
+                                    <div class="list-title fixed-element">
                                         <div class="d-flex justify-content-between">
                                             <span>In Progress</span>
                                             <div class="d-flex justify-content-between">
@@ -250,7 +145,7 @@
                                 </div>
 
                                 <div id='list7' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
-                                    <div class="list-title">
+                                    <div class="list-title fixed-element">
                                         <div class="d-flex justify-content-between">
                                             <span>In Review</span>
                                             <div class="d-flex justify-content-between">
@@ -271,7 +166,7 @@
 
                                 </div>
                                 <div id='list8' class="board-list" ondrop="dropIt(event)" ondragover="allowDrop(event)">
-                                    <div class="list-title">
+                                    <div class="list-title fixed-element">
                                         <div class="d-flex justify-content-between">
                                             <span>Completed</span>
                                             <div class="d-flex justify-content-between">
@@ -292,7 +187,6 @@
 
                                 </div>
                             </div>
-
 
                         </div>
 
@@ -371,6 +265,20 @@
         let priority_select = document.getElementById("priority_select"); //value set from options
         let selected_priority = document.getElementById("selected_priority"); //value set to filter form
         selected_priority.value = priority_select.value;
+
+        document.getElementById("filter-form").submit();
+    }
+
+    function filterboard() {
+        let board_select = document.getElementById("board-select").selectedOptions; //value set from options
+        let selected_board = document.getElementById("selected_boards");//value set to filter form
+        var values = [];
+        for (let i = 0; i < board_select.length; i++) {
+            values.push(board_select[i].value);
+        }
+        // var values = Array.from(board_select).map(({ value }) => value);
+        // console.log(board_select);
+        selected_board.value = values;
 
         document.getElementById("filter-form").submit();
     }

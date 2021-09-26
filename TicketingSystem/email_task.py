@@ -12,7 +12,7 @@ def notify_user(message, recipients):
     send_mail(
         APP_NAME,
         message,
-        'ticketingsystem@gmail.com',
+        'troubleticket@novafreight.net',
         recipients,
         fail_silently=False,
     )

@@ -13,6 +13,8 @@
                 {{ boards_serialized|json_script:"boards" }}
                 {{ groups_serialized|json_script:"groups" }}
                 {{ accounts_serialized|json_script:"accounts" }}
+                {{ priority_serialized|json_script:"priorities" }}
+                {{ classification_serialized|json_script:"classifications" }}
 
                 <!-- {{form}} -->
                 <div class="col-md-12 mt-4">
@@ -35,20 +37,13 @@
                                         placeholder="Ticket Name">
                                 </div>
                                 <div class="form-group">
-                                    <label for="priority">Priority</label>
-                                    <select class="form-control" id="priority" name="priority">
-                                        {% for priority in priorities %}
-                                        <option id="{{priority.id}}">{{priority.name}}</option>
-                                        {% endfor %}
+                                    <label for="boards">Boards</label>
+                                    <select multiple data-multi-select-plugin id="boards" name="boards">
+                                        <!-- {% for board in boards %}
+                                        <option id="{{board.id}}" value="{{board.title}}">{{board.title}}</option>
+                                        {% endfor %} -->
                                     </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="classification">Classification</label>
-                                    <select class="form-control" id="classification" name="classification">
-                                        {% for classification in classifications %}
-                                        <option id="{{classification.id}}">{{classification.name}}</option>
-                                        {% endfor %}
-                                    </select>
+
                                 </div>
 
                                 <div class="form-group">
@@ -58,14 +53,19 @@
                                     </select>
 
                                 </div>
-                                <div class="form-group">
-                                    <label for="boards">Boards</label>
-                                    <select multiple data-multi-select-plugin id="boards" name="boards">
-                                        <!-- {% for board in boards %}
-                                        <option id="{{board.id}}" value="{{board.title}}">{{board.title}}</option>
-                                        {% endfor %} -->
-                                    </select>
 
+
+                                <div class="form-group">
+                                    <label for="priority">Priority</label>
+                                    <select class="form-control" id="priority" name="priority">
+
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="classification">Classification</label>
+                                    <select class="form-control" id="classification" name="classification">
+
+                                    </select>
                                 </div>
 
                                 <div class="form-group">

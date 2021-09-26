@@ -38,8 +38,11 @@
 
 
     <script src="{% static '/js/dragdropswap.js'%}"></script>
+    <script src="{% static '/js/jquery.multi-select.js'%}"></script>
 
     <script>
+
+        $('#board-select').multiSelect();
 
 
         $('#bar').click(function () {
@@ -47,6 +50,19 @@
             $('#page-content-wrapper ,#sidebar-wrapper').toggleClass('toggled');
 
         });
+
+        $('#close').click(function () {
+            $(this).toggleClass('open');
+            $('#page-content-wrapper ,#sidebar-wrapper').toggleClass('toggled');
+
+        });
+
+        $('.comment-reply-btn').click(function (e) {
+            e.preventDefault();
+            console.log($(this).parent().next(".comment-reply"));
+            $(this).next(".comment-reply").fadeToggle();
+        });
+
 
     </script>
 

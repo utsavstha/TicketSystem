@@ -29,7 +29,7 @@ DEBUG = True
 APP_NAME = "Ticket System"
 URL = "localhost:8000/login"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.184', '127.0.0.1']
 
 AUTH_USER_MODEL = "core.Account"
 
@@ -95,6 +95,17 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'ticket_system',
+    #     'USER': 'root',
+    #     'PASSWORD': 'ncfs',
+    #     'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+    #     'PORT': '3306',
+    # }
+
+
 }
 
 
@@ -122,7 +133,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Canada/Pacific'
 
 USE_I18N = True
 
@@ -135,7 +146,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+STATIC_ROOT = ''
 
 MEDIA_URL = '/images/'
 
