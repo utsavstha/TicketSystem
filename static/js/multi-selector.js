@@ -6,6 +6,9 @@ var filteredBoards = []
 var selectedAccounts = []
 var filteredAccounts = []
 
+var selectedSupervisors = []
+var filteredSupervisors = []
+
 var selectedPriorities = []
 var filteredPriorities = []
 
@@ -15,6 +18,8 @@ var filteredClassifications = []
 var groups_select = undefined
 var boards_select = undefined
 var users_select = undefined
+var supervisors_select = undefined
+
 var priority_select = undefined
 var classification_select = undefined
 
@@ -28,8 +33,10 @@ const allClassifications = JSON.parse(JSON.parse(document.getElementById('classi
 if (ticket) {
     document.getElementById("staff_complete").checked = ticket.fields.can_staff_complete;
     selectedGroups = ticket.fields.assigned_group;
+    selectedSupervisors = ticket.fields.ticket_supervisors;
+
     selectedBoards = ticket.fields.board;
-    console.log("boards", selectedBoards);
+    console.log("selectedSupervisors", selectedSupervisors);
     selectedAccounts = ticket.fields.assigned_user;
     selectedPriorities = ticket.fields.priority;
     selectedClassifications = ticket.fields.classification;
@@ -40,6 +47,7 @@ if (ticket) {
 // addPriorities();
 
 filteredAccounts = allAccounts
+filteredSupervisors = allAccounts
 // Initialize function, create initial tokens with itens that are already selected by the user
 function init(element) {
     // Create div that wroaps all the elements inside (select, elements selected, search div) to put select inside
@@ -88,6 +96,8 @@ function init(element) {
         priority_select = element;
     } else if (element.id == "classification") {
         classification_select = element;
+    } else if (element.id == "supervisors") {
+        supervisors_select = element;
     }
     console.log("element", element);
     createInitialTokens(element);
@@ -197,6 +207,13 @@ function createToken(wrapper, target, parent = "none") {
                 }
             }
         } else if (parent == "assigned-users") {
+            for (let i = 0; i < allAccounts.length; i++) {
+                if (allAccounts[i].pk == target) {
+                    token_span.innerText = allAccounts[i].fields.email;
+                    id = allAccounts[i].pk
+                }
+            }
+        } else if (parent == "supervisors") {
             for (let i = 0; i < allAccounts.length; i++) {
                 if (allAccounts[i].pk == target) {
                     token_span.innerText = allAccounts[i].fields.email;
@@ -345,6 +362,8 @@ function selectOption(e) {
         filterClassifications()
     } else if (e.target.parentNode.id == "assigned-users") {
         selectedAccounts.push(e.target.id);
+    } else if (e.target.parentNode.id == "supervisors") {
+        selectedSupervisors.push(e.target.id);
     }
     // else if (e.target.parentNode.id == "priority") {
     //     selectedPriorities.push(e.target.id);
@@ -410,6 +429,9 @@ function getOptions(select) {
     } else if (select.id == "assigned-users") {
         all_options = filteredAccounts.map(el => [el.fields.email, el.pk.toString()])
         options_selected = selectedAccounts
+    } else if (select.id == "supervisors") {
+        all_options = filteredSupervisors.map(el => [el.fields.email, el.pk.toString()])
+        options_selected = selectedSupervisors
     }
 
     // const options_selected = Array.from(
@@ -522,6 +544,12 @@ function removeToken(e) {
                 delete selectedAccounts[i];
             }
         }
+    } else if (select.id == "supervisors") {
+        for (let i = 0; i < selectedSupervisors.length; i++) {
+            if (selectedSupervisors[i] == e.target.id) {
+                delete selectedSupervisors[i];
+            }
+        }
     }
 
     // else if (select.id == "priority") {
@@ -628,6 +656,8 @@ function onPostForm() {
     data.append('priority', priority.value);
     data.append('classification', classification.value);
     data.append('users', selectedAccounts);
+    data.append('supervisors', selectedSupervisors);
+
     data.append('staff_complete', staff_complete.checked);
     for (let i = 0; i < files.length; i++) {
         data.append(`files[${i}]`, files[i], files[i].name);

@@ -39,7 +39,7 @@
 
     </div>
     <div class="d-xl-flex justify-content-between mt-3">
-        <a href="{% url 'claim_ticket' ticket.id %}" style="z-index: 2;">
+        <a href="{% url 'claim_ticket' ticket.id %}" style="z-index: 5;">
             <div class="d-none d-sm-inline-block btn-sm btn-success shadow-sm ">
                 <span class="align-middle">Claim</span>
 
@@ -47,7 +47,7 @@
         </a>
         <a>
             <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
-                data-target="#attachment{{ticket.id}}">
+                data-target="#attachment{{ticket.id}}" style="z-index: 5;">
                 <span class="align-middle"> <i class="fas fa-paperclip">
                     </i></span>
             </button>
@@ -61,7 +61,7 @@
         </a>
 
         {% if request.user.is_superuser %}
-        <a href="{% url 'update_ticket' ticket.id %}" style="z-index: 2;">
+        <a href="{% url 'update_ticket' ticket.id %}" style="z-index: 5;">
             <div class="d-none d-sm-inline-block btn-sm btn-warning shadow-sm ">
                 <span class="align-middle"><i class="far fa-edit"></i></span>
 
