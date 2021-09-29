@@ -316,7 +316,8 @@ class TicketLog(models.Model):
     ticket_id = models.IntegerField()
     timestamp = models.DateTimeField(verbose_name="timestamp", auto_now=True)
     title = models.CharField(max_length=200, null=True)
-    updated_by = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
+    updated_by = models.ForeignKey(
+        Account, on_delete=models.SET_NULL, null=True)
     description = models.CharField(max_length=5000, null=True)
 
     def __str__(self):
@@ -327,7 +328,8 @@ class TicketComment(models.Model):
     comment = models.CharField(max_length=1000, null=True)
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(verbose_name="timestamp", auto_now=True)
-    posted_by = models.ForeignKey(Account, on_delete=models.DO_NOTHING)
+    posted_by = models.ForeignKey(
+        Account, on_delete=models.SET_NULL, null=True)
     parent = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.DO_NOTHING)
 
