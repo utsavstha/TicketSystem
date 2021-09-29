@@ -193,6 +193,10 @@ class Ticket(models.Model):
         Classification, on_delete=models.CASCADE)
     can_staff_complete = models.BooleanField()
 
+    @property
+    def get_assigned_users(self):
+        return list(self.assigned_user.all.values_list('email', flat=True))
+
     def searchTicket(group=None, search_keyword='', user=None, boards=None):
         tickets = []
         boards = Board.remove_general(boards)

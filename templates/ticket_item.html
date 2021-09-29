@@ -7,7 +7,6 @@
             <!-- <a href="{% url 'ticket_info' ticket.id %}" class="stretched-link">
             </a> -->
             <h6 class="card-title">{{ticket.title}} </h6>
-
             <p class="card-subtitle overme mt-4">{{ticket.description}} </p>
 
         </div>
@@ -39,15 +38,17 @@
 
     </div>
     <div class="d-xl-flex justify-content-between mt-3">
+        {% if user.get_username not in ticket.get_assigned_users %}
         <a href="{% url 'claim_ticket' ticket.id %}" style="z-index: 5;">
             <div class="d-none d-sm-inline-block btn-sm btn-success shadow-sm ">
                 <span class="align-middle">Claim</span>
-
             </div>
         </a>
-        <a>
+
+        {% endif %}
+        <a style="z-index: 5;">
             <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
-                data-target="#attachment{{ticket.id}}" style="z-index: 5;">
+                data-target="#attachment{{ticket.id}}">
                 <span class="align-middle"> <i class="fas fa-paperclip">
                     </i></span>
             </button>
