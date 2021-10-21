@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from core.models import Ticket, Group, TicketAttachment, TicketLog, Priority, Classification, Account, Board, TicketComment
+from core.models import Ticket, Group, TicketAttachment, TicketLog, Priority, Classification, Account, Board, TicketComment, BoardSuperuser
 from .forms import TicketAttachmentForm
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -19,7 +19,12 @@ def create_ticket(request):
     classifications = Classification.objects.all()
     groups = Group.objects.all()
     accounts = Account.objects.all()
-    boards = Board.objects.all()
+    boards = []
+
+    if request.user.is_admin or request.user.is_superuser:
+        boards = Board.objects.all()
+    else:
+        boards =  BoardSuperuser.can_create_tickets(request.user)
     file_form = TicketAttachmentForm()
     if request.method == 'POST':
         ticket_name = request.POST.get('ticket_name')
@@ -323,9 +328,15 @@ def has_privilages(user, ticketId, state):
             if ticket.can_staff_complete:
                 return True
             else:
-                return False
+                print("has_privilages: ", assigned_boards)
+                print("has_privilages: ", user)
+                board_superuser = BoardSuperuser.objects.filter(
+                    board__in=assigned_boards, user=user).first()
+                if board_superuser is not None and board_superuser.can_complete_ticket:
+                    return True
+                else:
+                    return False
         if isAssigned(user, ticket.assigned_user.all().values_list('email', flat=True)):
-            print("assigned")
             return True
         '''
         groups = Group.objects.filter(users=user)

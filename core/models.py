@@ -151,10 +151,32 @@ class Board(models.Model):
     def filter_all(group):
         all_boards = []
         boards = Board.objects.filter(group__in=group)
+        print("Board:", boards)
         all_boards.append({"title": "General", "id": -1})
         for i in range(len(boards)):
             all_boards.append(boards[i])
         return all_boards
+
+
+class BoardSuperuser(models.Model):
+    user = models.ForeignKey(
+        Account, on_delete=models.SET_NULL, null=True)
+    can_create_ticket = models.BooleanField(default=False)
+    can_complete_ticket = models.BooleanField(default=False)
+    board = models.ForeignKey(
+        Board, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"{self.user}, {self.can_create_ticket}, {self.can_complete_ticket}"
+
+    def filter(boards, user):
+        boards = Board.remove_general(boards)
+        print(boards)
+        return BoardSuperuser.objects.filter(board=boards, user=user)
+    def can_create_tickets(user):
+        boards = BoardSuperuser.objects.filter(user=user, can_create_ticket=True).values_list('board', flat=True)
+        board_list = Board.objects.filter(id__in=boards)
+        return board_list
 
 
 class Priority(models.Model):
@@ -213,6 +235,7 @@ class Ticket(models.Model):
 
         if group != None:
             if boards != None:
+                print(boards)
                 tickets = Ticket.objects.filter(
                     title__icontains=search_keyword, board__in=boards)
             else:
@@ -222,10 +245,10 @@ class Ticket(models.Model):
             if user != None:
                 if boards != None:
                     tickets = Ticket.objects.filter(
-                        assigned_user=user, title_icontains=search_keyword, board__in=boards)
+                        assigned_user=user, title__icontains=search_keyword, board__in=boards)
                 else:
                     tickets = Ticket.objects.filter(
-                        assigned_user=user, title_icontains=search_keyword)
+                        assigned_user=user, title__icontains=search_keyword)
             else:
                 if boards != None:
                     tickets = Ticket.objects.filter(

@@ -20,26 +20,26 @@
                     <i class="fas fa-home"></i> Boards
                 </a>
             </li>
-            {% if request.user.is_superuser %}
+            {% if request.user.is_superuser or request.user.is_admin %}
             <li class="">
                 <a href="{% url 'manage_board'%}" class="nav-link text-left {{activate_manage_board}}" role="button"
                     aria-haspopup="true" aria-expanded="false">
                     <i class="fas fa-home"></i> Manage Board
                 </a>
             </li>
-
-            <li class="">
-                <a href="{% url 'tickets'%}" class="nav-link text-left {{activate_tickets}}" role="button"
-                    aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-home"></i> Tickets
-                </a>
-            </li>
-
-
             <li class="">
                 <a href="{% url 'users'%}" class="nav-link text-left {{activate_users}}" role="button"
                     aria-haspopup="true" aria-expanded="false">
                     <i class="fas fa-home"></i> Users
+                </a>
+            </li>
+            {% endif %}
+
+            {% if request.user.is_superuser %}
+            <li class="">
+                <a href="{% url 'tickets'%}" class="nav-link text-left {{activate_tickets}}" role="button"
+                    aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-home"></i> Tickets
                 </a>
             </li>
 

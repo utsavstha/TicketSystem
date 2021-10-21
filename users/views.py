@@ -30,12 +30,16 @@ def update_user(request, pk):
     user = Account.objects.get(id=pk)
     form = UpdateUserForm(instance=user)
     if request.method == 'POST':
-        form = UpdateUserForm(request.POST, instance=user)
-        if form.is_valid():
-            form.save()
+        formUpdate = UpdateUserForm(request.POST, instance=user)
+        if formUpdate.is_valid():
+            formUpdate.save()
             # user.set_password(form.cleaned_data.get('password'))
             # user.save()
             return redirect('/users')
+        else:
+            print("invalid form")
+            print(formUpdate)
+
     context = {'activate_users': 'active', 'form': form}
     return render(request, 'users/users_form.html', context)
 

@@ -9,10 +9,10 @@ class BoardForm(ModelForm):
         fields = ['title', 'group', 'supervisor']
     group = forms.ModelMultipleChoiceField(
         queryset=Group.objects.all(),
-        widget=forms.CheckboxSelectMultiple
+        widget=forms.CheckboxSelectMultiple, required=False
     )
 
     supervisor = forms.ModelMultipleChoiceField(
         queryset=Account.objects.all(),
-        widget=forms.CheckboxSelectMultiple
+        widget=forms.CheckboxSelectMultiple, required=False
     )

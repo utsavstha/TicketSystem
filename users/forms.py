@@ -26,8 +26,11 @@ class UpdateUserForm(UserChangeForm):
         label=("Password")
     )
 
-    def __init__(self, instance=None, data=None, initial=None, *args, **kwargs):
+    def __init__(self, data=None, initial=None, *args, **kwargs):
+        instance = kwargs.get("instance")
+
         super(UpdateUserForm, self).__init__(*args, **kwargs)
+
         self.fields[
             'password'].help_text = f'<a href=\"http://127.0.0.1:8000/change_password/{instance.id}">Change Password</a>'
         self.fields['email'] = forms.CharField(

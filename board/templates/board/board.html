@@ -67,14 +67,12 @@
                                             </button>
                                         </div>
                                     </div>
-
                                 </div>
-                                {% if request.user.is_superuser or request.user.is_admin %}
 
                                 <a href="{% url 'create_ticket' %}"
                                     class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm ml-3">
                                     Add New Ticket<i class="fas fa-plus-circle mx-2"></i></a>
-                                {% endif %}
+
                                 <br />
 
                                 <div class="ml-auto" hidden>

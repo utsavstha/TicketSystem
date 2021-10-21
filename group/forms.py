@@ -12,10 +12,10 @@ class GroupForm(ModelForm):
         fields = ['name', 'users', 'supervisor']
     users = forms.ModelMultipleChoiceField(
         queryset=Account.objects.all(),
-        widget=forms.CheckboxSelectMultiple
+        widget=forms.CheckboxSelectMultiple, required=False
     )
 
     supervisor = forms.ModelMultipleChoiceField(
         queryset=Account.objects.all(),
-        widget=forms.CheckboxSelectMultiple
+        widget=forms.CheckboxSelectMultiple,  required=False
     )

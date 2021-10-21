@@ -1,0 +1,96 @@
+{% extends 'main.html' %}
+{% block content %}
+{% include 'nav.html' %}
+{% load bootstrap %}
+
+<div id="page-content-wrapper">
+    <div id="content">
+        <div class="container-fluid p-0 px-lg-0 px-md-0">
+            <!-- Topbar -->
+            {% include 'child_top_bar.html' %}
+            <div class="col-md-12 mt-4">
+
+                <!-- {{form}} -->
+                <div class="col-md-12 mt-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- title -->
+                            <div class="d-md-flex align-items-center">
+                                <div>
+                                    <h4 class="card-title">Board</h4>
+                                    <h5 class="card-subtitle">Board Name</h5>
+                                </div>
+
+                            </div>
+                            <!-- title -->
+                            <form action="" method="POST">
+                                {% csrf_token %}
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Email</th>
+
+                                            <th scope="col" style="text-align: center; vertical-align: middle;">Complete
+                                                Ticket</th>
+                                            <th scope="col" style="text-align: center; vertical-align: middle;">Create
+                                                Ticket</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        {% for user in users %}
+                                        {% if user.board_id == board.id or user.board_id == NULL%}
+                                        <tr>
+                                            <th scope="row">{{forloop.counter}}</th>
+                                            <td>{{user.email}}</td>
+                                            {% if user.can_complete_ticket %}
+                                            <td style="text-align: center; vertical-align: middle;"><input
+                                                    class="form-check-input" type="checkbox" id="complete_{{user.id}}"
+                                                    name="complete_{{user.id}}" checked>
+                                            </td>
+
+                                            {% else %}
+                                            <td style="text-align: center; vertical-align: middle;"><input
+                                                    class="form-check-input" type="checkbox" id="complete_{{user.id}}"
+                                                    name="complete_{{user.id}}">
+                                            </td>
+                                            {% endif %}
+
+                                            {% if user.can_create_ticket %}
+
+                                            <td style="text-align: center; vertical-align: middle;"><input
+                                                    class="form-check-input" type="checkbox" id="create_{{user.id}}"
+                                                    name="create_{{user.id}}" checked>
+                                                {% else %}
+                                            <td style="text-align: center; vertical-align: middle;"><input
+                                                    class="form-check-input" type="checkbox" id="create_{{user.id}}"
+                                                    name="create_{{user.id}}">
+                                                {% endif %}
+
+
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                        {% endfor %}
+
+                                    </tbody>
+                                </table>
+
+                                <input class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm " type="submit"
+                                    value="SAVE">
+                            </form>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+{% endblock %}

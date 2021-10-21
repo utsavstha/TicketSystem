@@ -6,7 +6,7 @@
     <div id="content">
         <div class="container-fluid p-0 px-lg-0 px-md-0">
             <!-- Topbar -->
-            {% include 'child_top_bar.html' %}
+            {% include 'child_top_bar.html' with redirect="boards"%}
             <div class="col-md-12 mt-4">
                 <div id="{{ticket.id}}" class="card " draggable="true" ondragstart="dragStart(event)">
                     <div class="d-md-flex justify-content-between">
